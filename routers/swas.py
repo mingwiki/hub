@@ -70,7 +70,7 @@ async def aliyun_request(action, config, extra_params=None):
 async def is_authorized(func, x_token, *args, **kwargs):
     """Check user authorization for Aliyun SWAS actions"""
     user_info = await get_user_info(x_token)
-    if user_info["email"] != "mingwiki@gmail.com":
+    if user_info["login"] != "mingwiki":
         raise HTTPException(
             status_code=403,
             detail="Unauthorized: Access denied for Aliyun SWAS actions.",

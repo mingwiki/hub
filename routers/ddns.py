@@ -15,7 +15,7 @@ log = logger(__name__)
 @decorator
 async def is_authorized(func, x_token, *args, **kwargs):
     user_info = await get_user_info(x_token)
-    if user_info["email"] != "mingwiki@gmail.com":
+    if user_info["login"] != "mingwiki":
         return PlainTextResponse("You are not authorized to update the DNS record.")
     return await func(x_token, *args, **kwargs)
 
