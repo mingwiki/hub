@@ -1,6 +1,3 @@
-import asyncio
-
-import uvloop
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -8,7 +5,12 @@ from models.db import create_tables
 from routers import auth, ddns, public, swas, webhooks
 from utils import close_http_client
 
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+try:
+    import uvloop
+except ImportError:
+    pass
+else:
+    uvloop.install()
 
 app = FastAPI(
     title="API Service",

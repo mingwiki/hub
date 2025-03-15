@@ -8,7 +8,7 @@ from routers.webhooks import send_summary
 
 
 async def send_daily_summary_to_fuming():
-    await send_summary("fuming")
+    return await send_summary("fuming")
 
 
 async def main():

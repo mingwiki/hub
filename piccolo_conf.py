@@ -4,12 +4,7 @@ from piccolo.conf.apps import AppRegistry
 from piccolo.engine.postgres import PostgresEngine
 from piccolo.engine.sqlite import SQLiteEngine
 
-# Determine the environment
-ENV = os.environ.get("ENV", "dev").lower()
-
-# Configure database based on environment
-if ENV == "prod":
-    # Production PostgreSQL configuration
+if os.environ.get("ENV", "dev").lower() == "prod":
     DB = PostgresEngine(
         config={
             "database": os.environ.get("DB_NAME", "core"),
@@ -20,10 +15,6 @@ if ENV == "prod":
         }
     )
 else:
-    # Development SQLite configuration
-    DB = SQLiteEngine(
-        path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "core.dev.db")
-    )
+    DB = SQLiteEngine(path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "core.dev.db"))
 
-# App registry remains the same
 APP_REGISTRY = AppRegistry(apps=[])

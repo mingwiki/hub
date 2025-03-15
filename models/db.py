@@ -71,11 +71,7 @@ class KeysDB:
     @staticmethod
     async def set(key, data):
         if isinstance(data, str):
-            try:
-                data = json.loads(data)
-            except json.JSONDecodeError:
-                log.error(f"Invalid JSON data for key {key}: {data}")
-                return
+            data = json.loads(data)
         return await Keys.insert(Keys(key=key, data=data)).on_conflict(
             target=Keys.key,
             action="DO UPDATE",
@@ -85,15 +81,9 @@ class KeysDB:
     @staticmethod
     async def get(key):
         result = await Keys.select().where(Keys.key == key).first()
-        if not result:
-            return None
-        data = result["data"]
+        data = result["data"] or None
         if isinstance(data, str):
-            try:
-                return json.loads(data)
-            except json.JSONDecodeError:
-                log.error(f"Failed to parse JSON data for key {key}: {data}")
-                return None
+            return json.loads(data)
         return data
 
     @staticmethod
@@ -156,6 +146,8 @@ class WebhooksDB:
 
     @staticmethod
     async def mark_as_sent(key):
-        return await Webhooks.update({Webhooks.sent_at: datetime.now()}).where(
-            Webhooks.key == key
-        )
+        return await Webhooks.update({Webhooks.sent_at: datetime.now()}).where(Webhooks.key == key)
+
+
+async def get_config(name):
+    return await KeysDB.get(name)

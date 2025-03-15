@@ -2,7 +2,7 @@ import aiohttp
 from fastapi import APIRouter, Header, HTTPException
 from fastapi.responses import RedirectResponse
 
-from config import Config
+from models.db import get_config
 from utils import logger
 
 router = APIRouter(tags=["Authorization"])
@@ -11,7 +11,7 @@ log = logger(__name__)
 
 @router.get("/login")
 async def login():
-    oauth_data = await Config.get_github_oauth()
+    oauth_data = await get_config("github_oauth")
     return RedirectResponse(
         f"{oauth_data['authorize_url']}?client_id={oauth_data['client_id']}&redirect_uri=https://api.zed.ink/auth/callback&response_type=code"
     )
@@ -19,7 +19,7 @@ async def login():
 
 @router.get("/auth/callback")
 async def auth_callback(code: str):
-    oauth_data = await Config.get_github_oauth()
+    oauth_data = await get_config("github_oauth")
     async with aiohttp.ClientSession() as session:
         async with session.post(
             oauth_data["token_url"],
@@ -42,11 +42,9 @@ async def auth_callback(code: str):
 
 @router.get("/me")
 async def get_user_info(x_token: str | None = Header(default=None)):
-    oauth_data = await Config.get_github_oauth()
+    oauth_data = await get_config("github_oauth")
     async with aiohttp.ClientSession() as session:
-        async with session.get(
-            oauth_data["user_url"], headers={"Authorization": f"Bearer {x_token}"}
-        ) as response:
+        async with session.get(oauth_data["user_url"], headers={"Authorization": f"Bearer {x_token}"}) as response:
             if response.status != 200:
                 raise HTTPException(
                     status_code=response.status,

@@ -3,8 +3,7 @@ import json
 import aiohttp
 from fastapi import APIRouter, Header, Request
 
-from config import Config
-from models.db import WebhooksDB
+from models.db import WebhooksDB, get_config
 from utils import atimer, logger, send_to_bark
 
 log = logger(__name__)
@@ -38,25 +37,17 @@ async def send_summary(name: str | None = Header(default=None)):
     total_unsent_entries = 0
 
     for entry in unsent_entries:
-        data = (
-            entry.get("data")
-            if isinstance(entry, dict)
-            else json.loads(entry).get("data", {})
-        )
+        data = entry.get("data") if isinstance(entry, dict) else json.loads(entry).get("data", {})
         data = json.loads(data) if not isinstance(data, dict) else data
         total_unsent_entries += len(data.get("entries", []))
 
-    miniflux = await Config.get_miniflux()
-    bark = await Config.get_bark()
+    miniflux = await get_config("miniflux")
+    bark = await get_config("bark")
     async with aiohttp.ClientSession() as session:
         headers = {"X-Auth-Token": miniflux["token"]}
-        async with session.get(
-            f"{miniflux['url']}entries?status=unread&direction=desc", headers=headers
-        ) as response:
+        async with session.get(f"{miniflux['url']}entries?status=unread&direction=desc", headers=headers) as response:
             if response.status != 200:
-                return (
-                    f"Failed to fetch unread entries from Miniflux: {response.status}"
-                )
+                return f"Failed to fetch unread entries from Miniflux: {response.status}"
             unread_entries = await response.json()
 
         result = await send_to_bark(
