@@ -11,8 +11,7 @@ from utils import generate_key, logger
 log = logger(__name__)
 
 
-class BaseModel(Table):
-    id = Serial(primary_key=True)
+class MetaModel(Table):
     created_at = Timestamp(
         default=datetime.now,
         index=True,
@@ -23,7 +22,11 @@ class BaseModel(Table):
         database = DB
 
 
-class Cache(Table):
+class BaseModel(MetaModel):
+    id = Serial(primary_key=True)
+
+
+class Cache(MetaModel):
     key = Varchar(length=255, primary_key=True)
     data = Bytea()
     access_time = Timestamp(
@@ -31,14 +34,6 @@ class Cache(Table):
         null=True,
         index=True,
     )
-    created_at = Timestamp(
-        default=datetime.now,
-        index=True,
-    )
-
-    class Meta:
-        schema = "public"
-        database = DB
 
 
 class Keys(BaseModel):
@@ -91,7 +86,7 @@ class KeysDB:
         return await Keys.delete().where(Keys.key == key)
 
 
-class SqliteCache:
+class CacheDB:
     @staticmethod
     async def set(key, data):
         serialized_data = pickle.dumps(data)

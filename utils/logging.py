@@ -22,7 +22,7 @@ if env == "prod":
         max_request_body_size="always",
         traces_sample_rate=0,
     )
-    sentry_handler = EventHandler(level=logging.ERROR)
+    sentry_handler = EventHandler(level=logging.WARNING)
     logging.getLogger().addHandler(sentry_handler)
 
 

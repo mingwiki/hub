@@ -3,38 +3,39 @@ from datetime import datetime
 from functools import lru_cache
 
 import aiohttp
-import matplotlib.pyplot as plt
-from fake_useragent import UserAgent
+from faker import Faker
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import StreamingResponse
+from PIL import Image, ImageDraw
 from yarl import URL
 
-from models.db import SqliteCache
+from models.db import CacheDB
 from utils import atimer, decode, get_http_client, logger
 
 log = logger(__name__)
 router = APIRouter(tags=["公共服务"])
 api_up_time = datetime.now()
+faker = Faker()
 
 
 @lru_cache
 def generate_status_code_image(status_code: int):
-    fig, ax = plt.subplots(figsize=(2, 2))
-    ax.set_facecolor("white")
-    ax.add_patch(plt.Rectangle((0, 0), 1, 1, color="white", ec="black", lw=5))
-    ax.text(
-        0.5, 0.5, str(status_code), color="red", fontsize=20, ha="center", va="center"
-    )
-    ax.axis("off")
+    img = Image.new("RGB", (200, 200), color="white")
+    draw = ImageDraw.Draw(img)
+    text = str(status_code)
+    text_bbox = draw.textbbox((0, 0), text)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+    position = ((200 - text_width) // 2, (200 - text_height) // 2)
+    draw.text(position, text, fill="red")
     img_byte_array = io.BytesIO()
-    plt.savefig(img_byte_array, format="png", dpi=100)
+    img.save(img_byte_array, format="PNG")
     img_byte_array.seek(0)
-    plt.close(fig)
     return img_byte_array.getvalue()
 
 
 async def stream_content(url: str, session: aiohttp.ClientSession):
-    cache = SqliteCache()
+    cache = CacheDB()
     cache_key = f"media_cache:{url}"
     cached_content = await cache.get(cache_key)
 
@@ -42,11 +43,7 @@ async def stream_content(url: str, session: aiohttp.ClientSession):
         return content_type.startswith("text") or "image/svg+xml" in content_type
 
     if cached_content:
-        if (
-            isinstance(cached_content, dict)
-            and "type" in cached_content
-            and "content" in cached_content
-        ):
+        if isinstance(cached_content, dict) and "type" in cached_content and "content" in cached_content:
             content_type = cached_content["type"]
             content = cached_content["content"]
 
@@ -60,14 +57,12 @@ async def stream_content(url: str, session: aiohttp.ClientSession):
         await cache.delete(cache_key)
     async with session.get(
         url,
-        headers={"User-Agent": UserAgent().random, "Connection": "keep-alive"},
+        headers={"User-Agent": faker.user_agent(), "Connection": "keep-alive"},
         allow_redirects=True,
         timeout=aiohttp.ClientTimeout(total=120),
     ) as response:
         if response.status != 200:
-            log.warning(
-                f"Request failed for {url}, headers: {response.headers}, status: {response.status}"
-            )
+            log.warning(f"Request failed for {url}, headers: {response.headers}, status: {response.status}")
             yield generate_status_code_image(response.status)
             return
 
@@ -103,7 +98,7 @@ async def media_proxy(
 @router.delete("/cache/{key:path}")
 @atimer(debug=True)
 async def clean_cache_items(key: str = "", days: int = 30):
-    cache = SqliteCache()
+    cache = CacheDB()
     if key:
         return await cache.delete(key)
     return await cache.delete_x_days_ago_old_items(days)

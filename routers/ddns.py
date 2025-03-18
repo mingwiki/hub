@@ -3,7 +3,7 @@ from decorator import decorator
 from fastapi import APIRouter, Header, Request
 from fastapi.responses import PlainTextResponse
 
-from models.db import SqliteCache, get_config
+from models.db import CacheDB, get_config
 from routers.auth import get_user_info
 from utils import atimer, logger
 
@@ -25,7 +25,7 @@ async def is_authorized(func, x_token, *args, **kwargs):
 async def generate_short_link_for_homeserver(
     x_token: str | None = Header(default=None),
 ):
-    cache = SqliteCache()
+    cache = CacheDB()
     short_link = await cache.save_short_link_data(x_token)
     return PlainTextResponse(f"Shortened URL: https://api.zed.ink/ddns/{short_link}")
 
@@ -33,7 +33,7 @@ async def generate_short_link_for_homeserver(
 @router.get("/{short_link}")
 @atimer(debug=True)
 async def update_cloudflare_dns_for_homeserver_by_currrent_ip(request: Request, short_link: str):
-    cache = SqliteCache()
+    cache = CacheDB()
     data = await cache.get_short_link_data(short_link)
     if not data:
         log.debug(f"Short link data not found, short_link is: {short_link}")
