@@ -11,7 +11,8 @@ from utils import generate_key, logger
 log = logger(__name__)
 
 
-class MetaModel(Table):
+class BaseModel(Table):
+    id = Serial(primary_key=True)
     created_at = Timestamp(
         default=datetime.now,
         index=True,
@@ -22,14 +23,10 @@ class MetaModel(Table):
         database = DB
 
 
-class BaseModel(MetaModel):
-    id = Serial(primary_key=True)
-
-
-class Cache(MetaModel):
-    key = Varchar(length=255, primary_key=True)
+class Cache(BaseModel):
+    key = Varchar(length=255, unique=True)
     data = Bytea()
-    access_time = Timestamp(
+    access_at = Timestamp(
         auto_update=True,
         null=True,
         index=True,
@@ -39,7 +36,7 @@ class Cache(MetaModel):
 class Keys(BaseModel):
     key = Varchar(length=255, unique=True)
     data = JSON()
-    access_time = Timestamp(
+    access_at = Timestamp(
         auto_update=True,
         null=True,
         index=True,
