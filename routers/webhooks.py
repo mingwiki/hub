@@ -1,6 +1,6 @@
 import json
 
-import aiohttp
+import httpx
 from fastapi import APIRouter, Header, Request
 
 from models.db import WebhooksDB, get_config
@@ -43,12 +43,12 @@ async def send_summary(name: str | None = Header(default=None)):
 
     miniflux = await get_config("miniflux")
     bark = await get_config("bark")
-    async with aiohttp.ClientSession() as session:
+    async with httpx.AsyncClient() as client:
         headers = {"X-Auth-Token": miniflux["token"]}
-        async with session.get(f"{miniflux['url']}entries?status=unread&direction=desc", headers=headers) as response:
-            if response.status != 200:
-                return f"Failed to fetch unread entries from Miniflux: {response.status}"
-            unread_entries = await response.json()
+        response = await client.get(f"{miniflux['url']}entries?status=unread&direction=desc", headers=headers)
+        if response.status_code != 200:
+            return f"Failed to fetch unread entries from Miniflux: {response.status_code}"
+        unread_entries = response.json()
 
         result = await send_to_bark(
             token=bark[name],

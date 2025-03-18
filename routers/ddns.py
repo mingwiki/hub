@@ -1,4 +1,4 @@
-import aiohttp
+import httpx
 from decorator import decorator
 from fastapi import APIRouter, Header, Request
 from fastapi.responses import PlainTextResponse
@@ -53,10 +53,10 @@ async def update_cloudflare_dns_for_homeserver(x_token: str = Header(), x_ip: st
         "Content-Type": "application/json",
     }
     data = {"type": "A", "name": "home.zed.ink", "content": x_ip, "ttl": 1}
-    async with aiohttp.ClientSession() as session:
-        async with session.put(
+    async with httpx.AsyncClient() as client:
+        response = await client.put(
             f"https://api.cloudflare.com/client/v4/zones/{cloudflare_ddns['zone_id']}/dns_records/{cloudflare_ddns['record_id']}",
             json=data,
             headers=headers,
-        ) as response:
-            return await response.json()
+        )
+        return response.json()

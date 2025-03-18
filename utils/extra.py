@@ -2,7 +2,7 @@ import asyncio
 import random
 import string
 
-import aiohttp
+import httpx
 
 from .logging import logger
 
@@ -40,8 +40,7 @@ async def send_to_bark(
     icon: str = "https://secure.gravatar.com/avatar/50397ee82c4b68806141f68a20fe2e8a",
 ):
     url = f"{url_base}/{token}/{title}/{content}?group={group}&icon={icon}"
-
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            response.raise_for_status()
-            return await response.json()
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        response.raise_for_status()
+        return response.json()

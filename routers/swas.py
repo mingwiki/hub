@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime, timezone
 from urllib.parse import quote, urlencode
 
-import aiohttp
+import httpx
 from decorator import decorator
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
@@ -55,11 +55,10 @@ async def aliyun_request(action, config, extra_params=None):
 
     params["Signature"] = generate_signature(params, config.access_key_secret)
     url = f"https://swas.{config.region_id}.aliyuncs.com/?{urlencode(params)}"
-
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            response.raise_for_status()
-            return await response.json()
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        response.raise_for_status()
+        return response.json()
 
 
 @decorator

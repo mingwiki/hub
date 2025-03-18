@@ -1,4 +1,4 @@
-import aiohttp
+import httpx
 from fastapi import APIRouter, Header, HTTPException
 from fastapi.responses import RedirectResponse
 
@@ -20,8 +20,8 @@ async def login():
 @router.get("/auth/callback")
 async def auth_callback(code: str):
     oauth_data = await get_config("github_oauth")
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
             oauth_data["token_url"],
             data={
                 "client_id": oauth_data["client_id"],
@@ -31,23 +31,23 @@ async def auth_callback(code: str):
                 "redirect_uri": "https://api.zed.ink/auth/callback",
             },
             headers={"Accept": "application/json"},
-        ) as response:
-            if response.status != 200:
-                raise HTTPException(
-                    status_code=response.status,
-                    detail="Failed to get token, visit: https://api.zed.ink/login ",
-                )
-            return await response.json()
+        )
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail="Failed to get token, visit: https://api.zed.ink/login ",
+            )
+        return response.json()
 
 
 @router.get("/me")
 async def get_user_info(x_token: str | None = Header(default=None)):
     oauth_data = await get_config("github_oauth")
-    async with aiohttp.ClientSession() as session:
-        async with session.get(oauth_data["user_url"], headers={"Authorization": f"Bearer {x_token}"}) as response:
-            if response.status != 200:
-                raise HTTPException(
-                    status_code=response.status,
-                    detail="Failed to get user info, visit: https://api.zed.ink/login ",
-                )
-            return await response.json()
+    async with httpx.AsyncClient() as client:
+        response = await client.get(oauth_data["user_url"], headers={"Authorization": f"Bearer {x_token}"})
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code,
+                detail="Failed to get user info, visit: https://api.zed.ink/login ",
+            )
+        return response.json()
