@@ -49,7 +49,6 @@ class Webhooks(BaseModel):
     sent_at = Timestamp(
         null=True,
         index=True,
-        default=None,
     )
 
 
@@ -107,7 +106,7 @@ class CacheDB:
     @staticmethod
     async def delete_x_days_ago_old_items(days):
         cutoff_date = datetime.now() - timedelta(days=days)
-        return await Cache.delete().where(Cache.access_time < cutoff_date)
+        return await Cache.delete().where(Cache.access_at < cutoff_date)
 
     async def get_short_link_data(self, short_link):
         return await self.get(f"short_link:{short_link}")
