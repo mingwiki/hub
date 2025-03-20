@@ -21,7 +21,9 @@ class SnapshotConfig(BaseModel):
     """Configuration model for Aliyun Snapshot operations"""
 
     disk_id: str = Field(..., description="ID of the disk to snapshot")
-    snapshot_name: str = Field(default_factory=lambda: f"Auto-Backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}")
+    snapshot_name: str = Field(
+        default_factory=lambda: f"Auto-Backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+    )
     access_key_id: str = Field(..., description="Aliyun Access Key ID")
     access_key_secret: str = Field(..., description="Aliyun Access Key Secret")
     region_id: str = Field(default="ap-southeast-1")
@@ -32,7 +34,9 @@ def generate_signature(params, secret):
     sorted_params = sorted(params.items())
     query_string = urlencode(sorted_params, safe="")
     sign_str = f"GET&%2F&{quote(query_string)}"
-    return base64.b64encode(hmac.new(f"{secret}&".encode(), sign_str.encode(), hashlib.sha1).digest()).decode()
+    return base64.b64encode(
+        hmac.new(f"{secret}&".encode(), sign_str.encode(), hashlib.sha1).digest()
+    ).decode()
 
 
 async def aliyun_request(action, config, extra_params=None):
@@ -57,7 +61,6 @@ async def aliyun_request(action, config, extra_params=None):
     url = f"https://swas.{config.region_id}.aliyuncs.com/?{urlencode(params)}"
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
-        response.raise_for_status()
         return response.json()
 
 
@@ -89,10 +92,14 @@ async def create_snapshot():
 
     if len(snapshots) >= 3:
         oldest_snapshot = min(snapshots, key=lambda x: x.get("CreationTime", ""))
-        await aliyun_request("DeleteSnapshot", config, {"SnapshotId": oldest_snapshot.get("SnapshotId")})
+        await aliyun_request(
+            "DeleteSnapshot", config, {"SnapshotId": oldest_snapshot.get("SnapshotId")}
+        )
     bark = await get_config("bark")
     return {
-        "snapshot": await aliyun_request("CreateSnapshot", config, {"SnapshotName": config.snapshot_name}),
+        "snapshot": await aliyun_request(
+            "CreateSnapshot", config, {"SnapshotName": config.snapshot_name}
+        ),
         "notification": await send_to_bark(
             token=bark["fuming"],
             title="服务器快照",

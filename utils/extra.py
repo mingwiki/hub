@@ -42,5 +42,4 @@ async def send_to_bark(
     url = f"{url_base}/{token}/{title}/{content}?group={group}&icon={icon}"
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
-        response.raise_for_status()
         return response.json()
