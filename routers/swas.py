@@ -76,18 +76,24 @@ async def is_authorized(func, x_token, *args, **kwargs):
     return await func(x_token, *args, **kwargs)
 
 
-async def create_snapshot():
-    """Core snapshot creation logic without requiring x_token"""
+async def get_aliyun_config():
     keys = await get_config("aliyun_accesskey")
-
-    config = SnapshotConfig(
+    return SnapshotConfig(
         disk_id=keys["disk_id"],
         access_key_id=keys["access_key_id"],
         access_key_secret=keys["access_key_secret"],
         region_id=keys.get("region_id", "ap-southeast-1"),
     )
 
-    data = await aliyun_request("ListSnapshots", config)
+
+async def list_snapshots():
+    config = await get_aliyun_config()
+    return await aliyun_request("ListSnapshots", config)
+
+
+async def create_snapshot():
+    config = await get_aliyun_config()
+    data = await list_snapshots()
     snapshots = data.get("Snapshots", [])
 
     if len(snapshots) >= 3:
@@ -114,3 +120,10 @@ async def create_snapshot():
 async def backup_snapshot(x_token=Header(default=None)):
     """Create a snapshot for an Aliyun Lightweight Server"""
     return await create_snapshot()
+
+
+@router.get("/snapshot")
+@is_authorized
+async def get_snapshot(x_token=Header(default=None)):
+    """Get snapshots info for an Aliyun Lightweight Server"""
+    return await list_snapshots()
