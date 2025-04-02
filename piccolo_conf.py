@@ -15,6 +15,8 @@ if os.environ.get("ENV", "dev").lower() == "prod":
         }
     )
 else:
-    DB = SQLiteEngine(path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "core.dev.db"))
+    DB = SQLiteEngine(
+        path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "core.dev.db")
+    )
 
 APP_REGISTRY = AppRegistry(apps=[])

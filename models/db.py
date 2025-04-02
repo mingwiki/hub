@@ -137,7 +137,9 @@ class WebhooksDB:
 
     @staticmethod
     async def mark_as_sent(key):
-        return await Webhooks.update({Webhooks.sent_at: datetime.now()}).where(Webhooks.key == key)
+        return await Webhooks.update({Webhooks.sent_at: datetime.now()}).where(
+            Webhooks.key == key
+        )
 
 
 async def get_config(name):

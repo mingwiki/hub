@@ -32,22 +32,30 @@ async def generate_short_link_for_homeserver(
 
 @router.get("/{short_link}")
 @atimer(debug=True)
-async def update_cloudflare_dns_for_homeserver_by_currrent_ip(request: Request, short_link: str):
+async def update_cloudflare_dns_for_homeserver_by_currrent_ip(
+    request: Request, short_link: str
+):
     cache = CacheDB()
     data = await cache.get_short_link_data(short_link)
     if not data:
         log.debug(f"Short link data not found, short_link is: {short_link}")
         return PlainTextResponse("Short link data not found.", status_code=404)
 
-    return await update_cloudflare_dns_for_homeserver(x_token=data, x_ip=request.client.host)
+    return await update_cloudflare_dns_for_homeserver(
+        x_token=data, x_ip=request.client.host
+    )
 
 
 @router.put("/")
 @is_authorized
 @atimer(debug=True)
-async def update_cloudflare_dns_for_homeserver(x_token: str = Header(), x_ip: str = Header()):
+async def update_cloudflare_dns_for_homeserver(
+    x_token: str = Header(), x_ip: str = Header()
+):
     cloudflare_ddns = await get_config("cloudflare_ddns")
-    log.debug(f"Updating DNS record for home server with IP: {x_ip} and token: {x_token}")
+    log.debug(
+        f"Updating DNS record for home server with IP: {x_ip} and token: {x_token}"
+    )
     headers = {
         "Authorization": f"Bearer {cloudflare_ddns['api_token']}",
         "Content-Type": "application/json",
