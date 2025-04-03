@@ -1,26 +1,24 @@
 import httpx
-from robyn import Response, SubRouter
+from fastapi import APIRouter, Header, HTTPException
+from fastapi.responses import RedirectResponse
 
 from models import get_config
 from utils import logger
 
-router = SubRouter(__file__)
+router = APIRouter(tags=["Authorization"])
 log = logger(__name__)
 
 
 @router.get("/login")
 async def login():
     oauth_data = await get_config("github_oauth")
-    redirect_url = f"{oauth_data['authorize_url']}?client_id={oauth_data['client_id']}&redirect_uri=https://api.zed.ink/auth/callback&response_type=code"
-    return Response(status_code=302, headers={"Location": redirect_url}, description="Redirecting to GitHub for authentication.")
+    return RedirectResponse(
+        f"{oauth_data['authorize_url']}?client_id={oauth_data['client_id']}&redirect_uri=https://api.zed.ink/auth/callback&response_type=code"
+    )
 
 
 @router.get("/auth/callback")
-async def auth_callback(query_params):
-    code = query_params.get("code")
-    if not code:
-        return Response(status_code=400, description={"detail": "Missing code parameter"})
-
+async def auth_callback(code: str):
     oauth_data = await get_config("github_oauth")
     async with httpx.AsyncClient() as client:
         response = await client.post(
@@ -35,25 +33,23 @@ async def auth_callback(query_params):
             headers={"Accept": "application/json"},
         )
         if response.status_code != 200:
-            return Response(
+            raise HTTPException(
                 status_code=response.status_code,
-                description={"detail": "Failed to get token, visit: https://api.zed.ink/login"},
+                detail="Failed to get token, visit: https://api.zed.ink/login ",
             )
-        return Response(status_code=200, description=response.json())
+        return response.json()
 
 
 @router.get("/me")
-async def get_user_info(headers):
-    x_token = headers.get("x-token")
-    if not x_token:
-        return Response(status_code=401, description={"detail": "Missing x-token header"})
-
+async def get_user_info(x_token: str | None = Header(default=None)):
     oauth_data = await get_config("github_oauth")
     async with httpx.AsyncClient() as client:
-        response = await client.get(oauth_data["user_url"], headers={"Authorization": f"Bearer {x_token}"})
+        response = await client.get(
+            oauth_data["user_url"], headers={"Authorization": f"Bearer {x_token}"}
+        )
         if response.status_code != 200:
-            return Response(
+            raise HTTPException(
                 status_code=response.status_code,
-                description={"detail": "Failed to get user info, visit: https://api.zed.ink/login"},
+                detail="Failed to get user info, visit: https://api.zed.ink/login ",
             )
-        return Response(status_code=200, description=response.json())
+        return response.json()

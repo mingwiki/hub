@@ -1,4 +1,3 @@
-import json
 from datetime import datetime, timedelta
 
 from prisma import Prisma
@@ -85,7 +84,7 @@ class WebhooksDB:
         key = generate_key(64)
         while await db.webhooks.find_unique(where={"key": key}):
             key = generate_key(64)
-        await db.webhooks.create(data={"key": key, "data": json.loads(data)})
+        await db.webhooks.create(data={"key": key, "data": data})
         return key
 
     @staticmethod
