@@ -1,0 +1,33 @@
+generator client {
+  provider             = "prisma-client-py"
+  recursive_type_depth = -1
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Cache {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  data      Bytes
+  access_at DateTime?
+  created_at DateTime @default(now())
+}
+
+model Keys {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  data      Json
+  access_at DateTime?
+  created_at DateTime @default(now())
+}
+
+model Webhooks {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  data      Json
+  sent_at   DateTime?
+  created_at DateTime @default(now())
+}
