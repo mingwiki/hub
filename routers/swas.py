@@ -10,7 +10,7 @@ from decorator import decorator
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
 
-from models.db import get_config
+from models import get_config
 from routers.auth import get_user_info
 from utils import send_to_bark
 

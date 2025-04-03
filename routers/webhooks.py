@@ -3,7 +3,7 @@ import json
 import httpx
 from fastapi import APIRouter, Header, Request
 
-from models.db import WebhooksDB, get_config
+from models import WebhooksDB, get_config
 from utils import atimer, logger, send_to_bark
 
 log = logger(__name__)

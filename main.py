@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from models.db import create_tables
 from routers import auth, ddns, swas, webhooks
 
 try:
@@ -31,8 +30,3 @@ app.include_router(auth.router)
 app.include_router(ddns.router)
 app.include_router(webhooks.router)
 app.include_router(swas.router)
-
-
-@app.on_event("startup")
-async def startup():
-    await create_tables()

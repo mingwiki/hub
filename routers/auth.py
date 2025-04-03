@@ -2,7 +2,7 @@ import httpx
 from fastapi import APIRouter, Header, HTTPException
 from fastapi.responses import RedirectResponse
 
-from models.db import get_config
+from models import get_config
 from utils import logger
 
 router = APIRouter(tags=["Authorization"])

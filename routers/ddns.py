@@ -3,7 +3,7 @@ from decorator import decorator
 from fastapi import APIRouter, Header, Request
 from fastapi.responses import PlainTextResponse
 
-from models.db import CacheDB, get_config
+from models import CacheDB, get_config
 from routers.auth import get_user_info
 from utils import atimer, logger
 
