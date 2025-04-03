@@ -1,47 +1,44 @@
 import json
 
 import httpx
-from fastapi import APIRouter, Header, Request
+from robyn import Request, Response, SubRouter
 
 from models import WebhooksDB, get_config
 from utils import atimer, logger, send_to_bark
 
 log = logger(__name__)
-router = APIRouter(tags=["Webhooks"], prefix="/hooks")
+router = SubRouter(__file__)
 
 
-@router.post("/flux")
+@router.get("/hooks/flux")
 @atimer(debug=True)
 async def miniflux_rss(request: Request):
     res = await request.json()
 
     if "feed" not in res:
-        return
+        return Response(status_code=400, description={"error": "Invalid payload"})
 
     data = {"entries": res["entries"], "title": res["feed"]["title"]}
 
     key = await WebhooksDB.save_entry(data)
     log.info(f"Webhook data stored: {key}")
 
-    return {"message": "Data saved", "key": key}
+    return Response(status_code=200, description={"message": "Data saved", "key": key})
 
 
-@router.post("/flux/send")
+@router.post("/hooks/flux/send")
 @atimer(debug=True)
-async def send_summary(name: str | None = Header(default=None)):
+async def send_summary(request: Request):
+    name = request.headers.get("name")
     if name is None:
-        return "No Bark configuration name provided"
+        return Response(status_code=400, description={"error": "No Bark configuration name provided"})
 
     unsent_entries = await WebhooksDB.get_unsent_entries()
 
     total_unsent_entries = 0
 
     for entry in unsent_entries:
-        data = (
-            entry.get("data")
-            if isinstance(entry, dict)
-            else json.loads(entry).get("data", {})
-        )
+        data = entry.get("data") if isinstance(entry, dict) else json.loads(entry).get("data", {})
         data = json.loads(data) if not isinstance(data, dict) else data
         total_unsent_entries += len(data.get("entries", []))
 
@@ -49,12 +46,11 @@ async def send_summary(name: str | None = Header(default=None)):
     bark = await get_config("bark")
     async with httpx.AsyncClient() as client:
         headers = {"X-Auth-Token": miniflux["token"]}
-        response = await client.get(
-            f"{miniflux['url']}entries?status=unread&direction=desc", headers=headers
-        )
+        response = await client.get(f"{miniflux['url']}entries?status=unread&direction=desc", headers=headers)
         if response.status_code != 200:
-            return (
-                f"Failed to fetch unread entries from Miniflux: {response.status_code}"
+            return Response(
+                status_code=500,
+                description={"error": f"Failed to fetch unread entries from Miniflux: {response.status_code}"},
             )
         unread_entries = response.json()
 
@@ -68,4 +64,4 @@ async def send_summary(name: str | None = Header(default=None)):
         for entry in unsent_entries:
             await WebhooksDB.mark_as_sent(entry["key"])
 
-        return result
+        return Response(status_code=200, description=result)
