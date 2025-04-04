@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from models import db
-from routers import auth, ddns, swas, webhooks
+from routers import auth, ddns, swas
 
 try:
     import uvloop
@@ -40,5 +40,4 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(ddns.router)
-app.include_router(webhooks.router)
 app.include_router(swas.router)

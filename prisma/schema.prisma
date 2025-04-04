@@ -4,8 +4,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./core.db"
 }
 
 model Cache {
@@ -19,7 +19,7 @@ model Cache {
 model Keys {
   id        Int      @id @default(autoincrement())
   key       String   @unique
-  data      Json
+  data      String 
   access_at DateTime?
   created_at DateTime @default(now())
 }
@@ -27,7 +27,7 @@ model Keys {
 model Webhooks {
   id        Int      @id @default(autoincrement())
   key       String   @unique
-  data      Json
+  data      String 
   sent_at   DateTime?
   created_at DateTime @default(now())
 }

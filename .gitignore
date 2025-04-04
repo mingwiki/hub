@@ -59,6 +59,7 @@ cover/
 *.log
 local_settings.py
 *.sqlite3*
+*.db*
 database/
 
 # Flask stuff:

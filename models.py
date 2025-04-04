@@ -79,32 +79,5 @@ class CacheDB:
         return short_link
 
 
-class WebhooksDB:
-    @staticmethod
-    async def save_entry(data):
-        key = generate_key(64)
-        while await db.webhooks.find_unique(where={"key": key}):
-            key = generate_key(64)
-        await db.webhooks.create(data={"key": key, "data": json.loads(data)})
-        return key
-
-    @staticmethod
-    async def get_unsent_entries():
-        entries = await db.webhooks.find_many(where={"sent_at": None})
-        for entry in entries:
-            await db.webhooks.update(
-                where={"key": entry.key},
-                data={"access_at": datetime.now()},
-            )
-        return entries
-
-    @staticmethod
-    async def mark_as_sent(key):
-        await db.webhooks.update(
-            where={"key": key},
-            data={"sent_at": datetime.now()},
-        )
-
-
 async def get_config(name):
     return await KeysDB.get(name)
