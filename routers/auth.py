@@ -92,19 +92,14 @@ async def user_info(current_user: User = Depends(get_current_user)):
     return {"id": current_user.id, "username": current_user.username, "is_active": current_user.is_active}
 
 
-class PasswordChangeRequest(BaseModel):
-    old_password: str
-    new_password: str
-
-
 @router.post("/change-password")
-async def change_password(req: PasswordChangeRequest, current_user=Depends(get_current_user)):
-    if not pwd_context.verify(req.old_password, current_user.hashed_password):
+async def change_password(old_password: str = Form(..., min_length=4), new_password: str = Form(..., min_length=4), current_user=Depends(get_current_user)):
+    if not pwd_context.verify(old_password, current_user.hashed_password):
         raise HTTPException(400, "原密码错误")
 
-    if req.old_password == req.new_password:
+    if old_password == new_password:
         raise HTTPException(400, "新旧密码不能相同")
 
-    new_hashed_password = pwd_context.hash(req.new_password)
+    new_hashed_password = pwd_context.hash(new_password)
 
     return {"message": "密码修改成功", "sql": await db.user.update(where={"id": current_user.id}, data={"hashed_password": new_hashed_password})}
