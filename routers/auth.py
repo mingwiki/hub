@@ -26,9 +26,9 @@ def get_password_hash(password: str):
 async def create_access_token(data: dict):
     jwt_config = await get_config("jwt_config")
     to_encode = data.copy()
-    expire = datetime.now() + timedelta(minutes=jwt_config.expire_minutes)
+    expire = datetime.now() + timedelta(minutes=jwt_config["expire_minutes"])
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, jwt_config.secret_key, algorithm=jwt_config.algorithm)
+    return jwt.encode(to_encode, jwt_config["secret_key"], algorithm=jwt_config["algorithm"])
 
 
 async def authenticate_user(username: str, password: str):
@@ -46,7 +46,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, jwt_config.secret_key, algorithms=[jwt_config.algorithm])
+        payload = jwt.decode(token, jwt_config["secret_key"], algorithms=[jwt_config["algorithm"]])
         username = payload.get("sub")
         if username is None:
             raise credentials_exception
