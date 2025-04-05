@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, Form, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from models import db, get_config
 from utils import logger
@@ -59,13 +59,18 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     return user
 
 
+class UserLogin(BaseModel):
+    username: str = Field(..., min_length=2, max_length=20)
+    password: str = Field(..., min_length=4, max_length=40)
+
+
 @router.post("/register", status_code=201)
-async def user_register(username: str = Form(..., min_length=2), password: str = Form(..., min_length=4)):
-    existing_user = await db.user.find_unique(where={"username": username})
+async def user_register(user: UserLogin):
+    existing_user = await db.user.find_unique(where={"username": user.username})
     if existing_user:
         raise HTTPException(status_code=400, detail="用户名已存在")
 
-    new_user = await db.user.create({"username": username, "hashed_password": get_password_hash(password)})
+    new_user = await db.user.create({"username": user.username, "hashed_password": get_password_hash(user.password)})
     return {"id": new_user.id, "username": new_user.username}
 
 
@@ -79,10 +84,8 @@ async def user_validate(form_data: OAuth2PasswordRequestForm = Depends()):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-class User(BaseModel):
+class User(UserLogin):
     id: int | None = None
-    username: str
-    password: str
     is_active: bool | None = None
     hashed_password: str | None = None
 
