@@ -2,8 +2,7 @@ import httpx
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import PlainTextResponse
 
-from models import CacheDB, get_config
-from routers.auth import get_current_user
+from models import CacheDB, get_config, get_current_user
 from utils import atimer, logger
 
 router = APIRouter(tags=["DDNS"], prefix="/ddns")

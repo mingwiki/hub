@@ -9,8 +9,7 @@ import httpx
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
-from models import get_config
-from routers.auth import get_current_user
+from models import get_config, get_current_user
 from utils import send_to_bark
 
 router = APIRouter(prefix="/aliyun", tags=["Aliyun API"])
