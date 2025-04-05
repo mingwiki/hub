@@ -6,11 +6,12 @@ from datetime import datetime, timezone
 from urllib.parse import quote, urlencode
 
 import httpx
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from models import get_config
-from utils import is_authorized, send_to_bark
+from routers.auth import get_current_user
+from utils import send_to_bark
 
 router = APIRouter(prefix="/aliyun", tags=["Aliyun API"])
 
@@ -94,14 +95,12 @@ async def create_snapshot():
 
 
 @router.post("/snapshot")
-@is_authorized
-async def backup_snapshot(token: str = Header()):
+async def backup_snapshot(current_user: str = Depends(get_current_user)):
     """Create a snapshot for an Aliyun Lightweight Server"""
     return await create_snapshot()
 
 
 @router.get("/snapshot")
-@is_authorized
-async def get_snapshot(token: str = Header()):
+async def get_snapshot(current_user: str = Depends(get_current_user)):
     """Get snapshots info for an Aliyun Lightweight Server"""
     return await list_snapshots()
