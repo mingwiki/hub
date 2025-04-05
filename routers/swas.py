@@ -6,13 +6,11 @@ from datetime import datetime, timezone
 from urllib.parse import quote, urlencode
 
 import httpx
-from decorator import decorator
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header
 from pydantic import BaseModel, Field
 
 from models import get_config
-from routers.auth import get_user_info
-from utils import send_to_bark
+from utils import is_authorized, send_to_bark
 
 router = APIRouter(prefix="/aliyun", tags=["Aliyun API"])
 
@@ -21,9 +19,7 @@ class SnapshotConfig(BaseModel):
     """Configuration model for Aliyun Snapshot operations"""
 
     disk_id: str = Field(..., description="ID of the disk to snapshot")
-    snapshot_name: str = Field(
-        default_factory=lambda: f"Auto-Backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
-    )
+    snapshot_name: str = Field(default_factory=lambda: f"Auto-Backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}")
     access_key_id: str = Field(..., description="Aliyun Access Key ID")
     access_key_secret: str = Field(..., description="Aliyun Access Key Secret")
     region_id: str = Field(default="ap-southeast-1")
@@ -34,9 +30,7 @@ def generate_signature(params, secret):
     sorted_params = sorted(params.items())
     query_string = urlencode(sorted_params, safe="")
     sign_str = f"GET&%2F&{quote(query_string)}"
-    return base64.b64encode(
-        hmac.new(f"{secret}&".encode(), sign_str.encode(), hashlib.sha1).digest()
-    ).decode()
+    return base64.b64encode(hmac.new(f"{secret}&".encode(), sign_str.encode(), hashlib.sha1).digest()).decode()
 
 
 async def aliyun_request(action, config, extra_params=None):
@@ -64,18 +58,6 @@ async def aliyun_request(action, config, extra_params=None):
         return response.json()
 
 
-@decorator
-async def is_authorized(func, x_token, *args, **kwargs):
-    """Check user authorization for Aliyun SWAS actions"""
-    user_info = await get_user_info(x_token)
-    if user_info["login"] != "mingwiki":
-        raise HTTPException(
-            status_code=403,
-            detail="Unauthorized: Access denied for Aliyun SWAS actions.",
-        )
-    return await func(x_token, *args, **kwargs)
-
-
 async def get_aliyun_config():
     keys = await get_config("aliyun_accesskey")
     return SnapshotConfig(
@@ -98,14 +80,10 @@ async def create_snapshot():
 
     if len(snapshots) >= 3:
         oldest_snapshot = min(snapshots, key=lambda x: x.get("CreationTime", ""))
-        await aliyun_request(
-            "DeleteSnapshot", config, {"SnapshotId": oldest_snapshot.get("SnapshotId")}
-        )
+        await aliyun_request("DeleteSnapshot", config, {"SnapshotId": oldest_snapshot.get("SnapshotId")})
     bark = await get_config("bark")
     return {
-        "snapshot": await aliyun_request(
-            "CreateSnapshot", config, {"SnapshotName": config.snapshot_name}
-        ),
+        "snapshot": await aliyun_request("CreateSnapshot", config, {"SnapshotName": config.snapshot_name}),
         "notification": await send_to_bark(
             token=bark["fuming"],
             title="服务器快照",

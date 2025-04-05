@@ -1,32 +1,22 @@
 import httpx
-from decorator import decorator
 from fastapi import APIRouter, Header, Request
 from fastapi.responses import PlainTextResponse
 
 from models import CacheDB, get_config
-from routers.auth import get_user_info
-from utils import atimer, logger
+from utils import atimer, is_authorized, logger
 
 router = APIRouter(tags=["DDNS"], prefix="/ddns")
 log = logger(__name__)
-
-
-@decorator
-async def is_authorized(func, x_token, *args, **kwargs):
-    user_info = await get_user_info(x_token)
-    if user_info["login"] != "mingwiki":
-        return PlainTextResponse("You are not authorized to update the DNS record.")
-    return await func(x_token, *args, **kwargs)
 
 
 @router.post("/")
 @is_authorized
 @atimer(debug=True)
 async def generate_short_link_for_homeserver(
-    x_token: str | None = Header(default=None),
+    token: str | None = Header(default=None),
 ):
     cache = CacheDB()
-    short_link = await cache.save_data_as_short_link(x_token)
+    short_link = await cache.save_data_as_short_link(token)
     return PlainTextResponse(f"Shortened URL: https://api.zed.ink/ddns/{short_link}")
 
 
@@ -39,15 +29,15 @@ async def update_cloudflare_dns_for_homeserver_by_currrent_ip(request: Request, 
         log.debug(f"Short link data not found, short_link is: {short_link}")
         return PlainTextResponse("Short link data not found.", status_code=404)
 
-    return await update_cloudflare_dns_for_homeserver(x_token=data, x_ip=request.client.host)
+    return await update_cloudflare_dns_for_homeserver(token=data, x_ip=request.client.host)
 
 
 @router.put("/")
 @is_authorized
 @atimer(debug=True)
-async def update_cloudflare_dns_for_homeserver(x_token: str = Header(), x_ip: str = Header()):
+async def update_cloudflare_dns_for_homeserver(token: str = Header(), x_ip: str = Header()):
     cloudflare_ddns = await get_config("cloudflare_ddns")
-    log.debug(f"Updating DNS record for home server with IP: {x_ip} and token: {x_token}")
+    log.debug(f"Updating DNS record for home server with IP: {x_ip} and token: {token}")
     headers = {
         "Authorization": f"Bearer {cloudflare_ddns['api_token']}",
         "Content-Type": "application/json",

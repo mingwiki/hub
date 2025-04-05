@@ -2,6 +2,7 @@ datasource db {
   provider = "sqlite"
   url      = "file:./core.db"
 }
+
 generator client {
   provider             = "prisma-client-py"
   recursive_type_depth = 5
@@ -9,18 +10,26 @@ generator client {
 }
 
 model Cache {
-  id        Int      @id @default(autoincrement())
-  key       String   @unique
-  data      Bytes
+  id         Int       @id @default(autoincrement())
+  key        String    @unique
+  data       Bytes
   updated_at DateTime? @updatedAt
-  created_at DateTime @default(now())
+  created_at DateTime  @default(now())
 }
 
 model Keys {
-  id        Int      @id @default(autoincrement())
-  key       String   @unique
-  data      String
+  id         Int       @id @default(autoincrement())
+  key        String    @unique
+  data       String
   updated_at DateTime? @updatedAt
-  created_at DateTime @default(now())
+  created_at DateTime  @default(now())
 }
 
+model User {
+  id              Int       @id @default(autoincrement())
+  username        String    @unique
+  hashed_password String
+  is_active       Boolean   @default(true)
+  updated_at      DateTime? @updatedAt
+  created_at      DateTime  @default(now())
+}
