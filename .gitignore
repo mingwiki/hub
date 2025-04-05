@@ -60,6 +60,7 @@ cover/
 local_settings.py
 *.sqlite3*
 *.db*
+prisma/migrations/
 database/
 
 # Flask stuff:
