@@ -1,5 +1,4 @@
 import json
-from datetime import datetime, timedelta
 
 from prisma import Prisma
 from utils import decode, encode, generate_key, logger
@@ -55,17 +54,12 @@ class CacheDB:
     async def delete(key):
         await db.cache.delete(where={"key": key})
 
-    @staticmethod
-    async def delete_x_days_ago_old_items(days):
-        cutoff_date = datetime.now() - timedelta(days=days)
-        await db.cache.delete_many(where={"access_at": {"lt": cutoff_date}})
-
-    async def get_short_link_data(self, short_link):
+    async def get_data_from_short_link(self, short_link):
         return await self.get(f"short_link:{short_link}")
 
-    async def save_short_link_data(self, data):
+    async def save_data_as_short_link(self, data):
         short_link = generate_key()
-        while await self.get_short_link_data(short_link):
+        while await self.get_data_from_short_link(short_link):
             short_link = generate_key()
         await self.set(f"short_link:{short_link}", data)
         return short_link
