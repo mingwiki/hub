@@ -1,33 +1,26 @@
-generator client {
-  provider             = "prisma-client-py"
-  recursive_type_depth = -1
-}
-
 datasource db {
   provider = "sqlite"
   url      = "file:./core.db"
+}
+generator client {
+  provider             = "prisma-client-py"
+  recursive_type_depth = 5
+  interface            = "asyncio"
 }
 
 model Cache {
   id        Int      @id @default(autoincrement())
   key       String   @unique
   data      Bytes
-  access_at DateTime?
+  updated_at DateTime? @updatedAt
   created_at DateTime @default(now())
 }
 
 model Keys {
   id        Int      @id @default(autoincrement())
   key       String   @unique
-  data      String 
-  access_at DateTime?
+  data      String
+  updated_at DateTime? @updatedAt
   created_at DateTime @default(now())
 }
 
-model Webhooks {
-  id        Int      @id @default(autoincrement())
-  key       String   @unique
-  data      String 
-  sent_at   DateTime?
-  created_at DateTime @default(now())
-}

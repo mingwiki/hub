@@ -22,13 +22,9 @@ class KeysDB:
 
     @staticmethod
     async def get(key):
-        entry = await db.keys.find_unique(where={"key": key})
+        entry = await db.keys.find_first(where={"key": key})
         if entry:
-            await db.keys.update(
-                where={"key": key},
-                data={"access_at": datetime.now()},
-            )
-            return entry.data
+            return json.loads(entry.data)
         return None
 
     @staticmethod
@@ -50,12 +46,8 @@ class CacheDB:
 
     @staticmethod
     async def get(key):
-        entry = await db.cache.find_unique(where={"key": key})
+        entry = await db.cache.find_first(where={"key": key})
         if entry:
-            await db.cache.update(
-                where={"key": key},
-                data={"access_at": datetime.now()},
-            )
             return decode(entry.data)
         return None
 
