@@ -24,7 +24,7 @@ async def atimer(func, debug=False, sync=False, *args, **kwargs):
 @decorator
 async def is_authorized(func, token, *args, **kwargs):
     async with httpx.AsyncClient() as client:
-        response = await client.get("/me", headers={"Authorization": f"Bearer {token}"})
+        response = await client.post("https://api.zed.ink/me", headers={"Authorization": f"Bearer {token}"})
         if response.status_code != 200:
             return PlainTextResponse("Token is invalid or expired.", status_code=401)
         user_info = response.json()
