@@ -2,7 +2,7 @@ import base64
 import hashlib
 import hmac
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from urllib.parse import quote, urlencode
 
 import httpx
@@ -45,7 +45,7 @@ async def aliyun_request(action, config, extra_params=None):
         "SignatureMethod": "HMAC-SHA1",
         "SignatureVersion": "1.0",
         "SignatureNonce": uuid.uuid4().hex,
-        "Timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "Timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
 
     if extra_params:
