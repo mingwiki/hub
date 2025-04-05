@@ -1,8 +1,9 @@
 import json
+import pickle
 from datetime import datetime, timedelta
 
 from prisma import Prisma
-from utils import decode, encode, generate_key, logger
+from utils import generate_key, logger
 
 log = logger(__name__)
 
@@ -35,7 +36,7 @@ class KeysDB:
 class CacheDB:
     @staticmethod
     async def set(key, data):
-        b64_data = encode(data)
+        b64_data = pickle.dumps(data)
         await db.cache.upsert(
             where={"key": key},
             data={
@@ -48,7 +49,7 @@ class CacheDB:
     async def get(key):
         entry = await db.cache.find_first(where={"key": key})
         if entry:
-            return decode(entry.data)
+            return pickle.loads(entry.data)
         return None
 
     @staticmethod
