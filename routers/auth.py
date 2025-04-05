@@ -60,13 +60,18 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     return user
 
 
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+
 @router.post("/register", status_code=201)
-async def user_register(username: str, password: str):
-    existing_user = await db.user.find_unique(where={"username": username})
+async def user_register(user: UserLogin):
+    existing_user = await db.user.find_unique(where={"username": user.username})
     if existing_user:
         raise HTTPException(status_code=400, detail="用户名已存在")
 
-    new_user = await db.user.create({"username": username, "hashed_password": get_password_hash(password)})
+    new_user = await db.user.create({"username": user.username, "hashed_password": get_password_hash(user.password)})
     return {"id": new_user.id, "username": new_user.username}
 
 
@@ -80,8 +85,14 @@ async def user_validate(form_data: OAuth2PasswordRequestForm = Depends()):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+class User(UserLogin):
+    id: int | None = None
+    is_active: bool | None = None
+    hashed_password: str | None = None
+
+
 @router.get("/me")
-async def user_info(current_user=Depends(get_current_user)):
+async def user_info(current_user: User = Depends(get_current_user)):
     return {"id": current_user.id, "username": current_user.username, "is_active": current_user.is_active}
 
 

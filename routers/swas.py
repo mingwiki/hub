@@ -2,7 +2,7 @@ import base64
 import hashlib
 import hmac
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import quote, urlencode
 
 import httpx
@@ -45,7 +45,7 @@ async def aliyun_request(action, config, extra_params=None):
         "SignatureMethod": "HMAC-SHA1",
         "SignatureVersion": "1.0",
         "SignatureNonce": uuid.uuid4().hex,
-        "Timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "Timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
 
     if extra_params:
@@ -95,13 +95,13 @@ async def create_snapshot():
 
 @router.post("/snapshot")
 @is_authorized
-async def backup_snapshot(x_token=Header(default=None)):
+async def backup_snapshot(token: str = Header()):
     """Create a snapshot for an Aliyun Lightweight Server"""
     return await create_snapshot()
 
 
 @router.get("/snapshot")
 @is_authorized
-async def get_snapshot(x_token=Header(default=None)):
+async def get_snapshot(token: str = Header()):
     """Get snapshots info for an Aliyun Lightweight Server"""
     return await list_snapshots()
