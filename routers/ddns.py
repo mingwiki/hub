@@ -12,6 +12,8 @@ log = logger(__name__)
 @router.post("/")
 @atimer(debug=True)
 async def generate_short_link_for_homeserver(current_user: str = Depends(get_current_user)):
+    if current_user != "mingwiki":
+        return PlainTextResponse("Permission denied.", status_code=403)
     cache = CacheDB()
     short_link = await cache.save_data_as_short_link(current_user)
     return PlainTextResponse(f"Shortened URL: https://api.zed.ink/ddns/{short_link}")

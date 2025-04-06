@@ -7,6 +7,7 @@ from urllib.parse import quote, urlencode
 
 import httpx
 from fastapi import APIRouter, Depends
+from fastapi.responses import PlainTextResponse
 
 from models import get_config, get_current_user
 from schemas import SnapshotConfig
@@ -85,11 +86,15 @@ async def create_snapshot():
 
 @router.post("/snapshot")
 async def backup_snapshot(current_user: str = Depends(get_current_user)):
+    if current_user != "mingwiki":
+        return PlainTextResponse("Permission denied.", status_code=403)
     """Create a snapshot for an Aliyun Lightweight Server"""
     return await create_snapshot()
 
 
 @router.get("/snapshot")
 async def get_snapshot(current_user: str = Depends(get_current_user)):
+    if current_user != "mingwiki":
+        return PlainTextResponse("Permission denied.", status_code=403)
     """Get snapshots info for an Aliyun Lightweight Server"""
     return await list_snapshots()

@@ -108,7 +108,7 @@ class UserDB:
         return {"id": new_user.id, "username": new_user.username}
 
     async def authenticate(self, username: str, password: str):
-        user = await db.user.find_first(where={"username": username})
+        user = await db.user.find_unique(where={"username": username})
         if not user or not pwd_context.verify(password, user.hashed_password):
             return None
         return user
