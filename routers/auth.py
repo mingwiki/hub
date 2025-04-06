@@ -30,8 +30,8 @@ async def user_register(
     return await user.register(username, password)
 
 
-@router.post("/token")
-async def user_validate(form_data: OAuth2PasswordRequestForm = Depends()):
+@router.post("/login")
+async def user_login(form_data: OAuth2PasswordRequestForm = Depends()):
     current_user = await user.authenticate(form_data.username, form_data.password)
     if not current_user:
         raise HTTPException(
@@ -51,7 +51,7 @@ async def user_info(current_user: User = Depends(get_current_user)):
     }
 
 
-@router.post("/change-password")
+@router.put("/password")
 async def change_password(
     old_password: str = Form(..., min_length=4),
     new_password: str = Form(..., min_length=4),
