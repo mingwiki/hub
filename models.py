@@ -12,7 +12,7 @@ from utils import decode, encode, generate_key, logger
 log = logger(__name__)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-db = Prisma()
+db = Prisma(http={"pool_size": 10, "max_linger_time": 300})
 
 
 class KeysDB:
