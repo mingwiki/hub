@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import PlainTextResponse
 
 from models import CacheDB, get_config, get_current_user
+from schemas import User
 from utils import atimer, logger
 
 router = APIRouter(tags=["DDNS"], prefix="/ddns")
@@ -11,11 +12,11 @@ log = logger(__name__)
 
 @router.post("/")
 @atimer(debug=True)
-async def generate_short_link_for_homeserver(current_user: str = Depends(get_current_user)):
-    if current_user != "mingwiki":
+async def generate_short_link_for_homeserver(current_user: User = Depends(get_current_user)):
+    if current_user.username != "mingwiki":
         return PlainTextResponse("Permission denied.", status_code=403)
     cache = CacheDB()
-    short_link = await cache.save_data_as_short_link(current_user)
+    short_link = await cache.save_data_as_short_link(current_user.username)
     return PlainTextResponse(f"Shortened URL: https://api.zed.ink/ddns/{short_link}")
 
 
