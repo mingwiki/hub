@@ -3,15 +3,14 @@ from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, Form, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt
-from passlib.context import CryptContext
-from pydantic import BaseModel
 
-from models import db, get_config, get_current_user
+from models import UserDB, get_config, get_current_user
+from schemas import User
 from utils import logger
 
 router = APIRouter(tags=["Authorization"])
+user = UserDB()
 log = logger(__name__)
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 async def create_access_token(data: dict):
@@ -22,39 +21,19 @@ async def create_access_token(data: dict):
     return jwt.encode(to_encode, jwt_config["secret_key"], algorithm=jwt_config["algorithm"])
 
 
-async def authenticate_user(username: str, password: str):
-    user = await db.user.find_first(where={"username": username})
-    if not user or not pwd_context.verify(password, user.hashed_password):
-        return None
-    return user
-
-
 @router.post("/register", status_code=201)
 async def user_register(username: str = Form(..., min_length=2), password: str = Form(..., min_length=4)):
-    existing_user = await db.user.find_unique(where={"username": username})
-    if existing_user:
-        raise HTTPException(status_code=400, detail="用户名已存在")
-
-    new_user = await db.user.create({"username": username, "hashed_password": pwd_context.hash(password)})
-    return {"id": new_user.id, "username": new_user.username}
+    return await user.register(username, password)
 
 
 @router.post("/token")
 async def user_validate(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await authenticate_user(form_data.username, form_data.password)
-    if not user:
+    current_user = await user.authenticate(form_data.username, form_data.password)
+    if not current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="用户名或密码错误")
 
-    access_token = await create_access_token(data={"sub": user.username})
+    access_token = await create_access_token(data={"sub": current_user.username})
     return {"access_token": access_token, "token_type": "bearer"}
-
-
-class User(BaseModel):
-    id: int | None = None
-    username: str
-    password: str
-    is_active: bool | None = None
-    hashed_password: str | None = None
 
 
 @router.get("/me")
@@ -63,11 +42,7 @@ async def user_info(current_user: User = Depends(get_current_user)):
 
 
 @router.post("/change-password")
-async def change_password(old_password: str = Form(..., min_length=4), new_password: str = Form(..., min_length=4), current_user=Depends(get_current_user)):
-    if not pwd_context.verify(old_password, current_user.hashed_password):
-        raise HTTPException(400, "原密码错误")
-
-    if old_password == new_password:
-        raise HTTPException(400, "新旧密码不能相同")
-
-    return {"message": "密码修改成功", "sql": await db.user.update(where={"id": current_user.id}, data={"hashed_password": pwd_context.hash(new_password)})}
+async def change_password(
+    old_password: str = Form(..., min_length=4), new_password: str = Form(..., min_length=4), current_user: User = Depends(get_current_user)
+):
+    return await user.change_password(old_password, new_password, current_user)

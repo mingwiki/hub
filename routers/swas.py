@@ -7,22 +7,12 @@ from urllib.parse import quote, urlencode
 
 import httpx
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel, Field
 
 from models import get_config, get_current_user
+from schemas import SnapshotConfig
 from utils import send_to_bark
 
 router = APIRouter(prefix="/aliyun", tags=["Aliyun API"])
-
-
-class SnapshotConfig(BaseModel):
-    """Configuration model for Aliyun Snapshot operations"""
-
-    disk_id: str = Field(..., description="ID of the disk to snapshot")
-    snapshot_name: str = Field(default_factory=lambda: f"Auto-Backup-{datetime.now().strftime('%Y%m%d-%H%M%S')}")
-    access_key_id: str = Field(..., description="Aliyun Access Key ID")
-    access_key_secret: str = Field(..., description="Aliyun Access Key Secret")
-    region_id: str = Field(default="ap-southeast-1")
 
 
 def generate_signature(params, secret):
