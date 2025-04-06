@@ -84,7 +84,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, jwt_config["secret_key"], algorithms=[jwt_config["algorithm"]])
+        payload = jwt.decode(
+            token, jwt_config["secret_key"], algorithms=[jwt_config["algorithm"]]
+        )
         username = payload.get("sub")
         if username is None:
             raise credentials_exception
@@ -104,7 +106,12 @@ class UserDB:
         if existing_user:
             raise HTTPException(status_code=400, detail="用户名已存在")
 
-        new_user = await db.user.create({"username": username, "hashed_password": pwd_context.hash(password)})
+        new_user = await db.user.create(
+            {
+                "username": username,
+                "hashed_password": pwd_context.hash(password),
+            }
+        )
         return {"id": new_user.id, "username": new_user.username}
 
     async def authenticate(self, username: str, password: str):
@@ -113,7 +120,9 @@ class UserDB:
             return None
         return user
 
-    async def change_password(self, old_password: str, new_password: str, current_user: User):
+    async def change_password(
+        self, old_password: str, new_password: str, current_user: User
+    ):
         if not pwd_context.verify(old_password, current_user.hashed_password):
             raise HTTPException(400, "原密码错误")
 
@@ -122,5 +131,8 @@ class UserDB:
 
         return {
             "message": "密码修改成功",
-            "sql": await db.user.update(where={"id": current_user.id}, data={"hashed_password": pwd_context.hash(new_password)}),
+            "sql": await db.user.update(
+                where={"id": current_user.id},
+                data={"hashed_password": pwd_context.hash(new_password)},
+            ),
         }

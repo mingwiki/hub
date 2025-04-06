@@ -44,7 +44,9 @@ async def auth_callback(code: str):
 async def get_user_info(x_token: str | None = Header(default=None)):
     oauth_data = await get_config("github_oauth")
     async with httpx.AsyncClient() as client:
-        response = await client.get(oauth_data["user_url"], headers={"Authorization": f"Bearer {x_token}"})
+        response = await client.get(
+            oauth_data["user_url"], headers={"Authorization": f"Bearer {x_token}"}
+        )
         if response.status_code != 200:
             raise HTTPException(
                 status_code=response.status_code,

@@ -12,7 +12,9 @@ log = logger(__name__)
 
 @router.post("/")
 @atimer(debug=True)
-async def generate_short_link_for_homeserver(current_user: User = Depends(get_current_user)):
+async def generate_short_link_for_homeserver(
+    current_user: User = Depends(get_current_user),
+):
     if current_user.username != "mingwiki":
         return PlainTextResponse("Permission denied.", status_code=403)
     cache = CacheDB()
@@ -22,7 +24,9 @@ async def generate_short_link_for_homeserver(current_user: User = Depends(get_cu
 
 @router.get("/{short_link}")
 @atimer(debug=True)
-async def update_cloudflare_dns_for_homeserver_by_currrent_ip(request: Request, short_link: str):
+async def update_cloudflare_dns_for_homeserver_by_currrent_ip(
+    request: Request, short_link: str
+):
     cache = CacheDB()
     data = await cache.get_data_from_short_link(short_link)
     if not data:
@@ -30,7 +34,9 @@ async def update_cloudflare_dns_for_homeserver_by_currrent_ip(request: Request, 
         return PlainTextResponse("Short link data not found.", status_code=404)
 
     current_ip = request.client.host
-    log.debug(f"Updating DNS record for home server with IP: {current_ip} and token: {current_ip}")
+    log.debug(
+        f"Updating DNS record for home server with IP: {current_ip} and token: {current_ip}"
+    )
     cloudflare_ddns = await get_config("cloudflare_ddns")
     headers = {
         "Authorization": f"Bearer {cloudflare_ddns['api_token']}",
