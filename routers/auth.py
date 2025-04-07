@@ -51,8 +51,8 @@ async def user_info(current_user: User = Depends(get_current_user)):
     }
 
 
-@router.put("/password")
-async def change_password(
+@router.put("/me")
+async def update_user_info(
     old_password: str = Form(..., min_length=4),
     new_password: str = Form(..., min_length=4),
     current_user: User = Depends(get_current_user),
