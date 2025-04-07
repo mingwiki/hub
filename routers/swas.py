@@ -82,10 +82,12 @@ async def create_snapshot():
             "CreateSnapshot", config, {"SnapshotName": config.snapshot_name}
         ),
         "notification": await send_to_bark(
+            url_base=bark["url"],
             token=bark["fuming"],
             title="服务器快照",
             content=f"{config.snapshot_name} 创建成功",
             group="Snapshot",
+            icon=bark["icon"],
         ),
     }
 

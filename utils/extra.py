@@ -36,8 +36,8 @@ async def send_to_bark(
     title: str = "Notification",
     content: str = "",
     group: str = "uncategorized",
-    url_base: str = "https://bark.api.zed.ink",
-    icon: str = "https://secure.gravatar.com/avatar/50397ee82c4b68806141f68a20fe2e8a",
+    url_base: str = "",
+    icon: str = "",
 ):
     url = f"{url_base}/{token}/{title}/{content}?group={group}&icon={icon}"
     async with httpx.AsyncClient() as client:
