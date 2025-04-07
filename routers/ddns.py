@@ -4,7 +4,7 @@ from fastapi.responses import PlainTextResponse
 
 from models import CacheDB, get_config, get_current_user
 from schemas import User
-from utils import atimer, logger
+from utils import atimer, logger, send_to_bark
 
 router = APIRouter(tags=["DDNS"], prefix="/ddns")
 log = logger(__name__)
@@ -38,6 +38,7 @@ async def update_cloudflare_dns_for_homeserver_by_currrent_ip(
         f"Updating DNS record for home server with IP: {current_ip} and token: {current_ip}"
     )
     cloudflare_ddns = await get_config("cloudflare_ddns")
+    bark = await get_config("bark")
     headers = {
         "Authorization": f"Bearer {cloudflare_ddns['api_token']}",
         "Content-Type": "application/json",
@@ -49,4 +50,14 @@ async def update_cloudflare_dns_for_homeserver_by_currrent_ip(
             json=data,
             headers=headers,
         )
-        return response.json()
+    return {
+        "cloudflare_ddns": response.json(),
+        "bark": await send_to_bark(
+            url_base=bark["url"],
+            token=bark["fuming"],
+            title="DDNS Update",
+            content=f"IP: {current_ip} 更新成功",
+            group="DDNS",
+            icon=bark["icon"],
+        ),
+    }
