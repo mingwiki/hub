@@ -1,9 +1,9 @@
 import json
 
+import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from prisma import Prisma
 from schemas import User
@@ -11,7 +11,6 @@ from utils import decode, encode, generate_key, logger
 
 log = logger(__name__)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 db = Prisma()
 
 
@@ -102,28 +101,33 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 class UserDB:
     async def register(self, username: str, password: str):
         existing_user = await db.user.find_unique(where={"username": username})
-
         if existing_user:
             raise HTTPException(status_code=400, detail="用户名已存在")
 
+        hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
         new_user = await db.user.create(
             {
                 "username": username,
-                "hashed_password": pwd_context.hash(password),
+                "hashed_password": hashed,
             }
         )
         return {"id": new_user.id, "username": new_user.username}
 
     async def authenticate(self, username: str, password: str):
         user = await db.user.find_unique(where={"username": username})
-        if not user or not pwd_context.verify(password, user.hashed_password):
+        if not user or not bcrypt.checkpw(
+            password.encode(), user.hashed_password.encode()
+        ):
             return None
+
         return user
 
     async def change_password(
         self, old_password: str, new_password: str, current_user: User
     ):
-        if not pwd_context.verify(old_password, current_user.hashed_password):
+        if not bcrypt.checkpw(
+            old_password.encode(), current_user.hashed_password.encode()
+        ):
             raise HTTPException(400, "原密码错误")
 
         if old_password == new_password:
@@ -133,6 +137,10 @@ class UserDB:
             "message": "密码修改成功",
             "sql": await db.user.update(
                 where={"id": current_user.id},
-                data={"hashed_password": pwd_context.hash(new_password)},
+                data={
+                    "hashed_password": bcrypt.hashpw(
+                        new_password.encode(), bcrypt.gensalt()
+                    ).decode()
+                },
             ),
         }
