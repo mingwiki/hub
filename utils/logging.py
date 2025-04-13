@@ -1,4 +1,4 @@
-import logging.config
+import logging
 import os
 import sys
 
@@ -9,6 +9,7 @@ logging.basicConfig(
     format="[%(asctime)s]-%(levelname)s-%(name)s-%(funcName)s()-L%(lineno)d ==> %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)],
 )
+
 
 if env == "prod":
     import sentry_sdk
@@ -26,6 +27,9 @@ if env == "prod":
             ),
         ],
     )
+    logging.getLogger("httpcore").setLevel(logging.INFO)
+    logging.getLogger("httpx").setLevel(logging.INFO)
+    logging.getLogger("prisma").setLevel(logging.INFO)
 
 
 def logger(name):
