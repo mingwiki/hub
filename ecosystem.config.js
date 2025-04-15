@@ -11,8 +11,8 @@ module.exports = {
     },
     {
       name: "Scheduler",
-      script: "src/scheduler.py",
-      interpreter: "/root/.pyenv/versions/apihub/bin/python",
+      script: "/root/.pyenv/versions/apihub/bin/python -m src.scheduler",
+      cwd: "./",
       env: {
         ENV: "prod",
       },
