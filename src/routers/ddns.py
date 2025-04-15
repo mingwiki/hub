@@ -2,9 +2,9 @@ import httpx
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import PlainTextResponse
 
-from models import CacheDB, get_config, get_current_user
-from schemas import User
-from utils import atimer, logger, send_to_bark
+from src.models import CacheDB, get_config, get_current_user
+from src.schemas import User
+from src.utils import atimer, logger, send_to_bark
 
 router = APIRouter(tags=["DDNS"], prefix="/ddns")
 log = logger(__name__)

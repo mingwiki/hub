@@ -2,8 +2,8 @@ import httpx
 from fastapi import APIRouter, Header, HTTPException
 from fastapi.responses import RedirectResponse
 
-from models import get_config
-from utils import logger
+from src.models import get_config
+from src.utils import logger
 
 router = APIRouter(tags=["GitHub OAuth"], prefix="/oauth")
 log = logger(__name__)

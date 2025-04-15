@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "API Hub",
       script: "/root/.pyenv/versions/apihub/bin/uvicorn",
-      args: "main:app --port 9999 --no-access-log",
+      args: "src.main:app --port 9999 --no-access-log",
       interpreter: "/root/.pyenv/versions/apihub/bin/python",
       env: {
         ENV: "prod",
@@ -11,7 +11,7 @@ module.exports = {
     },
     {
       name: "Scheduler",
-      script: "scheduler.py",
+      script: "src/scheduler.py",
       interpreter: "/root/.pyenv/versions/apihub/bin/python",
       env: {
         ENV: "prod",
