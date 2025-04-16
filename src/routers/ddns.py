@@ -39,9 +39,7 @@ async def update_cloudflare_dns_for_homeserver_by_currrent_ip(
         log.debug(f"Short link data not found, short_link is: {short_link}")
         return PlainTextResponse("Short link data not found.", status_code=404)
 
-    current_ip = request.headers.get("X-Forwarded-For") or request.headers.get(
-        "X-Real-IP", request.client.host
-    )
+    current_ip = request.headers.get("X-Forwarded-For", request.client.host)
     log.debug(
         f"Updating DNS record for home server with IP: {current_ip} and token: {current_ip}"
     )
