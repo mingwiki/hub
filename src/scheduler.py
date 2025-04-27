@@ -5,6 +5,13 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from src.models import db
 from src.routers.swas import create_snapshot
 
+try:
+    import uvloop
+except ImportError:
+    pass
+else:
+    uvloop.install()
+
 
 async def main():
     scheduler = AsyncIOScheduler(timezone="Asia/Singapore")
