@@ -4,8 +4,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from src.models import db
-from src.routers import auth, ddns, oauth, swas
+from models import db
+from routers import auth, ddns, oauth, swas
 
 try:
     import uvloop

@@ -2,8 +2,8 @@ import asyncio
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from src.models import db
-from src.routers.swas import create_snapshot
+from models import db
+from routers.swas import create_snapshot
 
 try:
     import uvloop

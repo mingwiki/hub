@@ -9,9 +9,9 @@ import httpx
 from fastapi import APIRouter, Depends
 from fastapi.responses import PlainTextResponse
 
-from src.models import get_config, get_current_user
-from src.schemas import SnapshotConfig, User
-from src.utils import send_to_bark
+from models import get_config, get_current_user
+from schemas import SnapshotConfig, User
+from utils import send_to_bark
 
 router = APIRouter(prefix="/aliyun", tags=["Aliyun API"])
 

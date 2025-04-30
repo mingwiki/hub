@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, Form, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt
 
-from src.models import UserDB, get_config, get_current_user
-from src.schemas import User
-from src.utils import logger
+from models import UserDB, get_config, get_current_user
+from schemas import User
+from utils import logger
 
 router = APIRouter(tags=["Authorization"])
 user = UserDB()
