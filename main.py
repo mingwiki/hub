@@ -2,10 +2,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 
-from models import db
-from routers import auth, ddns, oauth, swas
+from database import init_db
+from routers import auth
 
 try:
     import uvloop
@@ -17,9 +16,8 @@ else:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await db.connect()
+    await init_db(app=app)
     yield
-    await db.disconnect()
 
 
 app = FastAPI(
@@ -39,9 +37,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(auth.router)
-app.include_router(oauth.router)
-app.include_router(ddns.router)
-app.include_router(swas.router)

@@ -32,11 +32,11 @@ def generate_key(key_length: int = 6):
 
 
 async def send_to_bark(
+    url_base: str = "",
     token: str = "",
     title: str = "Notification",
     content: str = "",
     group: str = "uncategorized",
-    url_base: str = "",
     icon: str = "",
 ):
     url = f"{url_base}/{token}/{title}/{content}?group={group}&icon={icon}"

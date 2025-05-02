@@ -1,26 +1,12 @@
-from datetime import datetime, timedelta
-
 from fastapi import APIRouter, Depends, Form, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from jose import jwt
 
-from models import UserDB, get_config, get_current_user
-from schemas import User
+from models import User, UserHandler, get_current_user, jwt_create_token
 from utils import logger
 
 router = APIRouter(tags=["Authorization"])
-user = UserDB()
 log = logger(__name__)
-
-
-async def create_access_token(data: dict):
-    jwt_config = await get_config("jwt_config")
-    to_encode = data.copy()
-    expire = datetime.now() + timedelta(minutes=jwt_config["expire_minutes"])
-    to_encode.update({"exp": expire})
-    return jwt.encode(
-        to_encode, jwt_config["secret_key"], algorithm=jwt_config["algorithm"]
-    )
+user = UserHandler()
 
 
 @router.post("/register", status_code=201)
@@ -38,7 +24,7 @@ async def user_login(form_data: OAuth2PasswordRequestForm = Depends()):
             status_code=status.HTTP_401_UNAUTHORIZED, detail="用户名或密码错误"
         )
 
-    access_token = await create_access_token(data={"sub": current_user.username})
+    access_token = jwt_create_token(current_user.username)
     return {"access_token": access_token, "token_type": "bearer"}
 
 
