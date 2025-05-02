@@ -7,7 +7,7 @@ from fastapi.responses import PlainTextResponse
 from models import KeyringHandler, User, get_current_user
 from utils import atimer, generate_key, logger, send_to_bark
 
-router = APIRouter(tags=["DDNS"], prefix="/ddns")
+router = APIRouter(tags=["Cloudflare DDNS"], prefix="/ddns")
 log = logger(__name__)
 keyring = KeyringHandler()
 
