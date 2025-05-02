@@ -30,11 +30,10 @@ class KeyringHandler:
             existing_key.set_val(data)
             await existing_key.save()
         except DoesNotExist:
-            new_key = await Keyring.create(key=key)
-            new_key.set_val(data)
+            new_key = await Keyring.create(key=key, val=json.dumps(data))
             await new_key.save()
 
-    async def get(self, key: str) -> dict:
+    async def get(self, key: str):
         try:
             entry = await Keyring.get(key=key)
             return entry.get_val() if entry else None

@@ -1,4 +1,5 @@
 import asyncio
+import os
 import random
 import string
 
@@ -27,17 +28,19 @@ def bytes2human(n):
     return f"{n} B"
 
 
-def generate_key(key_length: int = 6):
-    return "".join(random.choices(string.ascii_letters + string.digits, k=key_length))
+def generate_key(prefix: str, key_length: int = 6):
+    return f"{prefix}_" + "".join(
+        random.choices(string.ascii_letters + string.digits, k=key_length)
+    )
 
 
 async def send_to_bark(
-    url_base: str = "",
-    token: str = "",
+    url_base: str = os.getenv("BARK_URL"),
+    token: str = os.getenv("BARK_TOKEN"),
     title: str = "Notification",
     content: str = "",
     group: str = "uncategorized",
-    icon: str = "",
+    icon: str = "https://static.zed.ink/wiki.png",
 ):
     url = f"{url_base}/{token}/{title}/{content}?group={group}&icon={icon}"
     async with httpx.AsyncClient() as client:
