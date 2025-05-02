@@ -12,6 +12,7 @@ class User(Model):
     username = fields.CharField(max_length=255, unique=True)
     email = fields.CharField(max_length=255, null=True)
     hashed_password = fields.CharField(max_length=255)
+    is_admin = fields.BooleanField(default=False)
     is_active = fields.BooleanField(default=True)
     created_at = fields.DatetimeField(default=datetime.now(timezone.utc))
     updated_at = fields.DatetimeField(auto_now=True)

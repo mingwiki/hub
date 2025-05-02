@@ -3,11 +3,11 @@ from tortoise import Tortoise
 DATABASE_URL = "sqlite://db.sqlite3"
 
 TORTOISE_ORM = {
-    "connections": {"default": DATABASE_URL},
+    "connections": {"sqlite": DATABASE_URL},
     "apps": {
         "models": {
             "models": ["models", "aerich.models"],
-            "default_connection": "default",
+            "default_connection": "sqlite",
         },
     },
 }
