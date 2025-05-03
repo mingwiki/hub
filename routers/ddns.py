@@ -30,12 +30,6 @@ async def generate_short_link_for_homeserver(
     return PlainTextResponse(f"Shortened URL: https://api.zed.ink/ddns/{short_link}")
 
 
-@router.get("/client_info")
-@atimer(debug=True)
-async def client_info(request: Request):
-    return {"client": request.client, "headers": dict(request.headers)}
-
-
 @router.get("/{short_link}")
 @atimer(debug=True)
 async def update_cloudflare_dns_for_homeserver_by_currrent_ip(

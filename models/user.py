@@ -45,12 +45,11 @@ class User:
         if old_password == new_password:
             raise HTTPException(400, "新旧密码不能相同")
 
-        hashed_password = bcrypt.hashpw(
-            new_password.encode(), bcrypt.gensalt()
-        ).decode()
         t_user.update(
             {
-                "hashed_password": hashed_password,
+                "hashed_password": bcrypt.hashpw(
+                    new_password.encode(), bcrypt.gensalt()
+                ).decode(),
                 "updated_at": datetime.now(timezone.utc).isoformat(),
             },
             doc_ids=[current_user.doc_id],

@@ -33,8 +33,8 @@ async def user_info(current_user=Depends(get_current_user)):
     return current_user
 
 
-@router.put("/me")
-async def update_user_info(
+@router.put("/me/password")
+async def update_user_password(
     old_password: str = Form(..., min_length=4),
     new_password: str = Form(..., min_length=4),
     current_user: dict = Depends(get_current_user),
