@@ -24,7 +24,7 @@ async def generate_short_link_for_homeserver(
         short_link,
         {
             "username": current_user["username"],
-            "ip": request.headers.get("X-Forward-For") or request.client.host,
+            "ip": request.headers.get("X-Forwarded-For") or request.client.host,
         },
     )
     return PlainTextResponse(f"Shortened URL: https://api.zed.ink/ddns/{short_link}")
