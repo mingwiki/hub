@@ -169,3 +169,5 @@ dump.rdb
 *.http
 
 migrations/
+
+db.json

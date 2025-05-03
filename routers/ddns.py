@@ -4,27 +4,26 @@ import httpx
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import PlainTextResponse
 
-from models import KeyringHandler, User, get_current_user
+from models import Keyring, get_current_user
 from utils import atimer, generate_key, logger, send_to_bark
 
 router = APIRouter(tags=["Cloudflare DDNS"], prefix="/ddns")
 log = logger(__name__)
-keyring = KeyringHandler()
 
 
 @router.post("/")
 @atimer(debug=True)
 async def generate_short_link_for_homeserver(
     request: Request,
-    current_user: User = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
-    if current_user.username != "mingwiki":
+    if current_user["is_admin"] is False:
         return PlainTextResponse("Permission denied.", status_code=403)
     short_link = generate_key(prefix="ddns")
-    await keyring.set(
+    Keyring.set(
         short_link,
         {
-            "username": current_user.username,
+            "username": current_user["username"],
             "headers": dict(request.headers),
             "client": request.client.host,
         },
@@ -43,7 +42,7 @@ async def client_info(request: Request):
 async def update_cloudflare_dns_for_homeserver_by_currrent_ip(
     request: Request, short_link: str
 ):
-    data = await keyring.get(short_link)
+    data = Keyring.get(short_link)
     if not data:
         log.debug(f"Short link data not found, short_link is: {short_link}")
         return PlainTextResponse("Short link data not found.", status_code=404)

@@ -2,66 +2,55 @@ from datetime import datetime, timezone
 
 import bcrypt
 from fastapi import HTTPException
-from tortoise import fields
-from tortoise.exceptions import DoesNotExist
-from tortoise.models import Model
+
+from database import Q, t_user
 
 
-class User(Model):
-    id = fields.IntField(pk=True)
-    username = fields.CharField(max_length=255, unique=True)
-    email = fields.CharField(max_length=255, null=True)
-    hashed_password = fields.CharField(max_length=255)
-    is_admin = fields.BooleanField(default=False)
-    is_active = fields.BooleanField(default=True)
-    created_at = fields.DatetimeField(default=datetime.now(timezone.utc))
-    updated_at = fields.DatetimeField(auto_now=True)
-
-    # Helper functions for User model
-    def check_password(self, password: str) -> bool:
-        return bcrypt.checkpw(password.encode(), self.hashed_password.encode())
-
-    def set_password(self, password: str):
-        self.hashed_password = bcrypt.hashpw(
-            password.encode(), bcrypt.gensalt()
-        ).decode()
-
-    class Meta:
-        table = "users"
-
-
-class UserHandler:
+class User:
     @staticmethod
-    async def register(username: str, password: str):
-        existing_user = await User.filter(username=username).first()
+    def register(username: str, password: str):
+        existing_user = t_user.get(Q.username == username)
         if existing_user:
             raise HTTPException(status_code=400, detail="用户名已存在")
 
-        new_user = User(username=username)
-        new_user.set_password(password)
-        await new_user.save()
+        hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+        user = {
+            "username": username,
+            "hashed_password": hashed_password,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "is_admin": False,
+            "is_active": True,
+        }
 
-        return {"id": new_user.id, "username": new_user.username}
+        return {"id": t_user.insert(user), "user": user}
 
     @staticmethod
-    async def authenticate(username: str, password: str):
-        try:
-            user = await User.get(username=username)
-            if not user.check_password(password):
-                return None
-            return user
-        except DoesNotExist:
+    def authenticate(username: str, password: str):
+        user = t_user.get(Q.username == username)
+        if not user:
             return None
 
+        if not bcrypt.checkpw(password.encode(), user["hashed_password"].encode()):
+            return None
+
+        return user
+
     @staticmethod
-    async def change_password(old_password: str, new_password: str, current_user: User):
-        if not current_user.check_password(old_password):
+    def change_password(old_password: str, new_password: str, current_user: dict):
+        if not bcrypt.checkpw(
+            old_password.encode(), current_user["hashed_password"].encode()
+        ):
             raise HTTPException(400, "原密码错误")
 
         if old_password == new_password:
             raise HTTPException(400, "新旧密码不能相同")
 
-        current_user.set_password(new_password)
-        await current_user.save()
+        hashed_password = bcrypt.hashpw(
+            new_password.encode(), bcrypt.gensalt()
+        ).decode()
+        t_user.update(
+            {"hashed_password": hashed_password}, doc_ids=[current_user.doc_id]
+        )
 
         return {"message": "密码修改成功"}

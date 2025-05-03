@@ -4,11 +4,9 @@ from datetime import datetime, timedelta
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from tortoise.exceptions import DoesNotExist
 
+from database import Q, t_user
 from utils import logger
-
-from .user import User
 
 log = logger(__name__)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -41,10 +39,8 @@ def jwt_create_token(username: str):
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
-    try:
-
-        username = jwt_decode(token)
-        user = await User.get(username=username)
-    except DoesNotExist:
+    username = jwt_decode(token)
+    user = t_user.get(Q.username == username)
+    if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
