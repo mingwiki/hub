@@ -17,7 +17,6 @@ class User:
         user = {
             "username": username,
             "hashed_password": hashed_password,
-            "created_at": datetime.now(timezone.utc).isoformat(),
             "updated_at": datetime.now(timezone.utc).isoformat(),
             "is_admin": False,
             "is_active": True,
@@ -50,7 +49,11 @@ class User:
             new_password.encode(), bcrypt.gensalt()
         ).decode()
         t_user.update(
-            {"hashed_password": hashed_password}, doc_ids=[current_user.doc_id]
+            {
+                "hashed_password": hashed_password,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            },
+            doc_ids=[current_user.doc_id],
         )
 
         return {"message": "密码修改成功"}

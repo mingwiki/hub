@@ -10,7 +10,6 @@ class Keyring:
             {
                 "key": key,
                 "val": data,
-                "created_at": datetime.now(timezone.utc).isoformat(),
                 "updated_at": datetime.now(timezone.utc).isoformat(),
             },
             Q.key == key,
