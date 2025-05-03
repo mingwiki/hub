@@ -17,15 +17,14 @@ async def generate_short_link_for_homeserver(
     request: Request,
     current_user=Depends(get_current_user),
 ):
-    if current_user["is_admin"] is False:
+    if not current_user["is_admin"]:
         return PlainTextResponse("Permission denied.", status_code=403)
     short_link = generate_key(prefix="ddns")
     Keyring.set(
         short_link,
         {
             "username": current_user["username"],
-            "headers": dict(request.headers),
-            "client": request.client.host,
+            "ip": request.headers.get("X-Forward-For") or request.client.host,
         },
     )
     return PlainTextResponse(f"Shortened URL: https://api.zed.ink/ddns/{short_link}")
