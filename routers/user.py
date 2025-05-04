@@ -5,7 +5,7 @@ from models import User, get_current_user, jwt_create_token
 from schemas import UserUpdate
 from utils import logger
 
-router = APIRouter(tags=["Authorization"], prefix="/user")
+router = APIRouter(tags=["User Info"], prefix="/user")
 log = logger(__name__)
 
 
