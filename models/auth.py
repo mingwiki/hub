@@ -9,7 +9,7 @@ from database import Q, t_user
 from utils import logger
 
 log = logger(__name__)
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/token")
 
 
 def jwt_decode(token: str):

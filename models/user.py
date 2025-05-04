@@ -4,11 +4,12 @@ import bcrypt
 from fastapi import HTTPException
 
 from database import Q, t_user
-from schemas import UserCreate, UserInfo, UserUpdate
+from schemas import UserInfo, UserUpdate
 
 
 class User:
-    def register(userinfo: UserCreate):
+
+    def register(userinfo: UserUpdate):
         existing_user = t_user.get(Q.username == userinfo.username)
         if existing_user:
             raise HTTPException(status_code=400, detail="用户名已存在")
@@ -32,42 +33,35 @@ class User:
 
         return user
 
-    def change_password(old_password: str, new_password: str, current_user: dict):
-        if not bcrypt.checkpw(
-            old_password.encode(), current_user["hashed_password"].encode()
-        ):
-            raise HTTPException(400, "原密码错误")
-
-        if old_password == new_password:
-            raise HTTPException(400, "新旧密码不能相同")
-
-        return {
-            "message": "密码修改成功",
-            "q": t_user.update(
-                {
-                    "hashed_password": bcrypt.hashpw(
-                        new_password.encode(), bcrypt.gensalt()
-                    ).decode(),
-                    "updated_at": datetime.now(timezone.utc).isoformat(),
-                },
-                doc_ids=[current_user.doc_id],
-            ),
-        }
-
     def update(userinfo: UserUpdate, current_user: dict):
         if userinfo.username != current_user["username"]:
             existing_user = t_user.get(Q.username == userinfo.username)
             if existing_user:
                 raise HTTPException(status_code=400, detail="用户名已存在")
+        user = UserInfo(
+            username=userinfo.username,
+            email=userinfo.email,
+            is_active=userinfo.is_active,
+            hashed_password=current_user["hashed_password"],
+            is_admin=current_user["is_admin"],
+            updated_at=datetime.now(timezone.utc).isoformat(),
+        ).model_dump()
+        if userinfo.password:
+            if bcrypt.checkpw(
+                userinfo.password.encode(),
+                current_user["hashed_password"].encode(),
+            ):
+                raise HTTPException(400, detail="新密码不能与旧密码相同")
+            user.update(
+                {
+                    "hashed_password": bcrypt.hashpw(
+                        userinfo.password.encode(), bcrypt.gensalt()
+                    ).decode()
+                }
+            )
         return {
             "message": "用户信息已更新",
-            "q": t_user.update(
-                {
-                    **userinfo.model_dump(),
-                    "updated_at": datetime.now(timezone.utc).isoformat(),
-                },
-                doc_ids=[current_user.doc_id],
-            ),
+            "q": t_user.update(user, doc_ids=[current_user.doc_id]),
         }
 
     def delete(username: str):
