@@ -29,7 +29,6 @@ if env == "prod":
     )
     logging.getLogger("httpcore").setLevel(logging.INFO)
     logging.getLogger("httpx").setLevel(logging.INFO)
-    logging.getLogger("prisma").setLevel(logging.INFO)
 
 
 def logger(name):

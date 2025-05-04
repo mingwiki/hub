@@ -28,5 +28,5 @@ app.add_middleware(
 )
 
 
-app.include_router(user.router)
 app.include_router(ddns.router)
+app.include_router(user.router)
