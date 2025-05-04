@@ -29,7 +29,7 @@ async def user_login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 @router.get("/me")
-async def user_info(current_user=Depends(get_current_user)):
+async def get_user_info(current_user=Depends(get_current_user)):
     current_user.pop("hashed_password")
     return current_user
 
