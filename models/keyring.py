@@ -1,11 +1,10 @@
 from datetime import datetime, timezone
 
-from database import Q, t_keyring
+from .database import Q, t_keyring
 
 
 class Keyring:
     def set(key: str, data: dict):
-
         return t_keyring.upsert(
             {
                 "key": key,

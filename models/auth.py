@@ -4,16 +4,15 @@ from datetime import datetime, timedelta
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-
-from database import Q, t_user
 from utils import logger
+
+from .database import Q, t_user
 
 log = logger(__name__)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/token")
 
 
 def jwt_decode(token: str):
-
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="无法验证token",

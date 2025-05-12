@@ -2,13 +2,12 @@ from datetime import datetime, timezone
 
 import bcrypt
 from fastapi import HTTPException
-
-from database import Q, t_user
 from schemas import UserInfo, UserUpdate
+
+from .database import Q, t_user
 
 
 class User:
-
     def register(userinfo: UserUpdate):
         existing_user = t_user.get(Q.username == userinfo.username)
         if existing_user:
