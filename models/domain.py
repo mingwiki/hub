@@ -47,22 +47,17 @@ class DomainTreeManager:
         self._save()
 
     def list_full_domains(self):
-        """
-        Return only full domain names (all leaves), sorted by the first label.
-        """
         results = []
 
         def walk(node, parts):
             if not node:
-                # leaf: reverse parts back to domain.tld order
                 results.append(".".join(parts[::-1]))
             else:
                 for key in sorted(node):
                     walk(node[key], parts + [key])
 
-        # build the list
         walk(self.tree, [])
 
-        # sort by first label (leftmost segment)
-        results.sort(key=lambda d: d.split(".")[0])
+        # Sort by right part first (e.g. com, example), then by leftmost (subdomain)
+        results.sort(key=lambda d: (d.split(".")[::-1], d.split(".")[0]))
         return results
