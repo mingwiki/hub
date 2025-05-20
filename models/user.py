@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 import bcrypt
 from fastapi import HTTPException
+
 from schemas import UserInfo, UserUpdate
 
 from .database import Q, t_user

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import ddns, domain, user
+from routes import routers
 
 try:
     import uvloop
@@ -27,7 +27,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-app.include_router(ddns.router)
-app.include_router(domain.router)
-app.include_router(user.router)
+for router in routers:
+    app.include_router(router)
