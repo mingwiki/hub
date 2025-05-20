@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Domain Manager</title>
+</head>
+
+<body>
+    <h1>Manage Domains</h1>
+    <form action="/list/submit/" method="post">
+        <label>Add (one per line):</label><br />
+        <textarea name="adds" rows="5" cols="40"></textarea><br />
+        <label>Delete (one per line):</label><br />
+        <textarea name="dels" rows="5" cols="40"></textarea><br />
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Current Tree</h2>
+    <ol>
+        {% for d in domains %}
+        <li style="padding-left: 1rem;">{{ d }}</li>
+        {% endfor %}
+    </ol>
+</body>
+
+</html>
