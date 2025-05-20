@@ -1,26 +1,107 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Domain Tree Manager</title>
+        <style>
+            html {
+                font-size: 16px;
+            }
 
-<head>
-    <title>Domain Manager</title>
-</head>
+            body {
+                font-family: sans-serif;
+                margin: 0;
+                padding: 0;
+            }
 
-<body>
-    <h1>Manage Domains</h1>
-    <form action="/list/submit/" method="post">
-        <label>Add (one per line):</label><br />
-        <textarea name="adds" rows="5" cols="40"></textarea><br />
-        <label>Delete (one per line):</label><br />
-        <textarea name="dels" rows="5" cols="40"></textarea><br />
-        <button type="submit">Submit</button>
-    </form>
+            .container {
+                display: flex;
+                height: 100vh;
+            }
 
-    <h2>Current Tree</h2>
-    <ol>
-        {% for d in domains %}
-        <li style="padding-left: 1rem;">{{ d }}</li>
-        {% endfor %}
-    </ol>
-</body>
+            .form-panel {
+                width: 30rem;
+                min-width: 18rem;
+                padding: 1.25rem;
+                border-right: 0.0625rem solid #ccc;
+                box-sizing: border-box;
+            }
 
+            .list-panel {
+                flex-grow: 1;
+                padding: 1.25rem;
+                overflow-y: auto;
+                box-sizing: border-box;
+                background: #f9f9f9;
+            }
+
+            textarea {
+                width: 100%;
+                height: 12.5rem;
+                resize: vertical;
+                font-family: monospace;
+                margin-bottom: 1rem;
+            }
+
+            button {
+                padding: 0.5rem 1rem;
+                margin-right: 0.5rem;
+                font-size: 1rem;
+            }
+
+            h2 {
+                margin-top: 0;
+            }
+
+            ol {
+                list-style-type: decimal-leading-zero;
+            }
+
+            li {
+                margin-bottom: 0.25rem;
+            }
+
+            .domain-item {
+                font-family: monospace;
+                background: #fff;
+                padding: 0.25rem 0.5rem;
+                border: 0.0625rem solid #ddd;
+                border-radius: 0.25rem;
+                display: inline-block;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="form-panel">
+                <h2>Manage Domains</h2>
+                <form action="/domain/submit" method="post">
+                    <label>Add Domains (one per line):</label><br />
+                    <textarea name="adds"></textarea><br />
+
+                    <label>Delete Domains (one per line):</label><br />
+                    <textarea name="dels"></textarea><br />
+
+                    <button type="submit">Submit</button>
+                </form>
+                <form action="/import_rules" method="post">
+                    <label>Import SwitchyOmega Rules</label>
+                    <textarea
+                        name="rules"
+                        placeholder="*.google.com +proxy&#10;*.chatgpt.com +proxy"></textarea>
+                    <button type="submit">Import</button>
+                </form>
+            </div>
+
+            <div class="list-panel">
+                <h2>Domain List</h2>
+                <ol>
+                    {% for domain in domains %}
+                    <li><span class="domain-item">{{ domain }}</span></li>
+                    {% endfor %}
+                </ol>
+            </div>
+        </div>
+    </body>
 </html>

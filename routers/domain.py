@@ -8,7 +8,7 @@ templates = Jinja2Templates(directory="templates")
 
 from fastapi import APIRouter, Request
 
-router = APIRouter(tags=["Proxy file"], prefix="/list")
+router = APIRouter(tags=["Proxy file"], prefix="/domain")
 mgr = DomainTreeManager()
 
 
@@ -24,7 +24,26 @@ async def submit(adds: str = Form(""), dels: str = Form("")):
     add_list = [l for l in adds.splitlines() if l.strip()]
     del_list = [l for l in dels.splitlines() if l.strip()]
     mgr.batch(add_list, del_list)
-    return RedirectResponse("/list", status_code=303)
+    return RedirectResponse("/domain", status_code=303)
+
+
+@router.post("/import_rules")
+async def import_rules(rules: str = Form(...)):
+    domains = []
+    for line in rules.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split()
+        if not parts:
+            continue
+        domain = parts[0].lstrip("*.")  # Remove leading "*." if present
+        domains.append(domain)
+
+    if domains:
+        mgr.batch(domains, [])  # Add only
+
+    return RedirectResponse(url="/domain", status_code=303)
 
 
 @router.get("/pac")
@@ -66,7 +85,7 @@ def get_autoproxy_txt():
     return body
 
 
-@router.get("/txt")
+@router.get("/list")
 async def autoproxy_txt():
 
     return Response(get_autoproxy_txt(), media_type="text/plain")
