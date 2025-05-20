@@ -3,18 +3,19 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from models import User, get_current_user, jwt_create_token
 from schemas import UserUpdate
-from utils import logger
+from utils import atimer
 
 router = APIRouter(tags=["User Info"], prefix="/user")
-log = logger(__name__)
 
 
 @router.post("/register", status_code=201)
+@atimer(debug=True)
 async def user_register(userinfo: UserUpdate = Form(...)):
     return User.register(userinfo)
 
 
 @router.post("/token")
+@atimer(debug=True)
 async def user_login(form_data: OAuth2PasswordRequestForm = Depends()):
     current_user = User.authenticate(form_data.username, form_data.password)
     if not current_user:
@@ -29,12 +30,14 @@ async def user_login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 @router.get("/me")
+@atimer(debug=True)
 async def get_user_info(current_user=Depends(get_current_user)):
     current_user.pop("hashed_password")
     return current_user
 
 
 @router.put("/me")
+@atimer(debug=True)
 async def update_user_info(
     userinfo: UserUpdate = Form(...),
     current_user=Depends(get_current_user),
@@ -43,6 +46,7 @@ async def update_user_info(
 
 
 @router.delete("/me")
+@atimer(debug=True)
 async def delete_user_info(
     username: str = Form(...),
     current_user=Depends(get_current_user),

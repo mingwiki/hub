@@ -5,10 +5,9 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import PlainTextResponse
 
 from models import Keyring, get_current_user
-from utils import atimer, generate_key, logger, send_to_bark
+from utils import atimer, generate_key, send_to_bark
 
 router = APIRouter(tags=["Cloudflare DDNS"], prefix="/ddns")
-log = logger(__name__)
 
 
 @router.post("/")
@@ -37,13 +36,10 @@ async def update_cloudflare_dns_for_homeserver_by_currrent_ip(
 ):
     data = Keyring.get(short_link)
     if not data:
-        log.debug(f"Short link data not found, short_link is: {short_link}")
         return PlainTextResponse("Short link data not found.", status_code=404)
 
     current_ip = request.headers.get("X-Forwarded-For", request.client.host)
-    log.debug(
-        f"Updating DNS record for home server with IP: {current_ip} and token: {current_ip}"
-    )
+
     headers = {
         "Authorization": f"Bearer {os.getenv('CLOUDFLARE_API_TOKEN')}",
         "Content-Type": "application/json",
