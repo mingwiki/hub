@@ -40,10 +40,10 @@ class DomainTreeManager:
                 break
 
     def batch(self, adds, dels):
-        for d in adds:
-            self._add(d)
         for d in dels:
             self._delete(d)
+        for d in adds:
+            self._add(d)
         self._save()
 
     def list_full_domains(self):
