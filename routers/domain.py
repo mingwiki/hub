@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from models import DomainTreeManager
 
 templates = Jinja2Templates(directory="templates")
-router = APIRouter(tags=["Proxy file"], prefix="/domain")
+router = APIRouter(tags=["Domain Manage"], prefix="/domain")
 mgr = DomainTreeManager()
 
 
@@ -80,12 +80,6 @@ def get_autoproxy_txt():
     lines += [f"||{d}" for d in domains]
     body = "\n".join(lines)
     return body
-
-
-@router.get("/list")
-async def autoproxy_txt():
-
-    return Response(get_autoproxy_txt(), media_type="text/plain")
 
 
 @router.get("/b64")
