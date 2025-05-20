@@ -1,13 +1,10 @@
-from fastapi import Form, Request, Response
+from fastapi import APIRouter, Form, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from models import DomainTreeManager
 
 templates = Jinja2Templates(directory="templates")
-
-from fastapi import APIRouter, Request
-
 router = APIRouter(tags=["Proxy file"], prefix="/domain")
 mgr = DomainTreeManager()
 
@@ -64,10 +61,10 @@ async def autoproxy_pac():
     pac = f"""
 function FindProxyForURL(url, host) {{
 {body}
-    return "PROXY proxy.example.com:8080; DIRECT";
+    return "DIRECT";
 }}
 """
-    return Response(pac.strip(), media_type="application/x-ns-proxy-autoconfig")
+    return Response(pac.strip(), media_type="text/plain")
 
 
 def get_autoproxy_txt():
