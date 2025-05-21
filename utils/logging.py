@@ -6,7 +6,7 @@ env = os.getenv("ENV", "dev").lower()
 
 logging.basicConfig(
     level=logging.INFO if env == "prod" else logging.DEBUG,
-    format="[%(asctime)s]-%(levelname)s-%(name)s-%(funcName)s()-L%(lineno)d ==> %(message)s",
+    format="[%(asctime)s]-%(levelname)s-%(name)s-%(funcName)s()-L%(lineno)d => %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)],
 )
 

@@ -11,7 +11,7 @@ mgr = DomainTreeManager()
 
 
 @router.get("/", response_class=HTMLResponse)
-@atimer(debug=True)
+@atimer
 async def form_view(request: Request):
     return templates.TemplateResponse(
         "domain.html", {"request": request, "domains": mgr.list_full_domains()}
@@ -19,7 +19,7 @@ async def form_view(request: Request):
 
 
 @router.post("/submit/")
-@atimer(debug=True)
+@atimer
 async def submit(adds: str = Form(""), dels: str = Form("")):
     add_list = [l for l in adds.splitlines() if l.strip()]
     del_list = [l for l in dels.splitlines() if l.strip()]
@@ -28,7 +28,7 @@ async def submit(adds: str = Form(""), dels: str = Form("")):
 
 
 @router.post("/import_rules")
-@atimer(debug=True)
+@atimer
 async def import_rules(rules: str = Form(...)):
     domains = []
     for line in rules.splitlines():
@@ -48,7 +48,7 @@ async def import_rules(rules: str = Form(...)):
 
 
 @router.get("/pac")
-@atimer(debug=True)
+@atimer
 async def autoproxy_pac():
     """
     Generate a PAC file routing all listed domains DIRECTLY,
@@ -88,7 +88,7 @@ def get_autoproxy_txt():
 
 
 @router.get("/b64")
-@atimer(debug=True)
+@atimer
 async def autoproxy_base64():
     import base64
 

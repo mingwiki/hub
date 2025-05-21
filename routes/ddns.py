@@ -11,7 +11,7 @@ router = APIRouter(tags=["Cloudflare DDNS"], prefix="/ddns")
 
 
 @router.post("/")
-@atimer(debug=True)
+@atimer
 async def generate_short_link_for_homeserver(
     request: Request,
     current_user=Depends(get_current_user),
@@ -30,7 +30,7 @@ async def generate_short_link_for_homeserver(
 
 
 @router.get("/{short_link}")
-@atimer(debug=True)
+@atimer
 async def update_cloudflare_dns_for_homeserver_by_currrent_ip(
     request: Request, short_link: str
 ):

@@ -1,4 +1,3 @@
-import asyncio
 import os
 import random
 import string
@@ -8,12 +7,6 @@ import httpx
 from .logging import logger
 
 log = logger(__name__)
-
-
-async def run_in_executor(func, *args):
-    loop = asyncio.get_event_loop()
-
-    return await loop.run_in_executor(None, func, *args)
 
 
 def bytes2human(n):

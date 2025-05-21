@@ -9,13 +9,13 @@ router = APIRouter(tags=["User Info"], prefix="/user")
 
 
 @router.post("/register", status_code=201)
-@atimer(debug=True)
+@atimer
 async def user_register(userinfo: UserUpdate = Form(...)):
     return User.register(userinfo)
 
 
 @router.post("/token")
-@atimer(debug=True)
+@atimer
 async def user_login(form_data: OAuth2PasswordRequestForm = Depends()):
     current_user = User.authenticate(form_data.username, form_data.password)
     if not current_user:
@@ -30,14 +30,14 @@ async def user_login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 @router.get("/me")
-@atimer(debug=True)
+@atimer
 async def get_user_info(current_user=Depends(get_current_user)):
     current_user.pop("hashed_password")
     return current_user
 
 
 @router.put("/me")
-@atimer(debug=True)
+@atimer
 async def update_user_info(
     userinfo: UserUpdate = Form(...),
     current_user=Depends(get_current_user),
@@ -46,7 +46,7 @@ async def update_user_info(
 
 
 @router.delete("/me")
-@atimer(debug=True)
+@atimer
 async def delete_user_info(
     username: str = Form(...),
     current_user=Depends(get_current_user),
