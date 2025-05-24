@@ -18,7 +18,7 @@ async def form_view(request: Request):
     )
 
 
-@router.post("/submit/")
+@router.post("/submit")
 @atimer
 async def submit(adds: str = Form(""), dels: str = Form("")):
     add_list = [l for l in adds.splitlines() if l.strip()]
@@ -27,7 +27,7 @@ async def submit(adds: str = Form(""), dels: str = Form("")):
     return RedirectResponse("/domain", status_code=303)
 
 
-@router.post("/import_rules")
+@router.post("/import")
 @atimer
 async def import_rules(rules: str = Form(...)):
     domains = []
@@ -45,31 +45,6 @@ async def import_rules(rules: str = Form(...)):
         mgr.batch(domains, [])  # Add only
 
     return RedirectResponse(url="/domain", status_code=303)
-
-
-@router.get("/pac")
-@atimer
-async def autoproxy_pac():
-    """
-    Generate a PAC file routing all listed domains DIRECTLY,
-    and sending everything else via proxy:8080.
-    """
-    domains = mgr.list_full_domains()
-    # Build if-clauses for each domain
-    lines = []
-    for d in domains:
-        # match exact host or any subdomain
-        lines.append(
-            f'    if (shExpMatch(host, "*.{d}") || host == "{d}") return "proxy";'
-        )
-    body = "\n".join(lines)
-    pac = f"""
-function FindProxyForURL(url, host) {{
-{body}
-    return "DIRECT";
-}}
-"""
-    return Response(pac.strip(), media_type="text/plain")
 
 
 def get_autoproxy_txt():
