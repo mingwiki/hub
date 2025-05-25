@@ -68,7 +68,7 @@
         <div class="layout">
             <div class="form">
                 <h2>Manage Domains</h2>
-                <form action="/domain/submit" method="post">
+                <form action="/domain" method="post">
                     <label>Add Domains (one per line):</label><br />
                     <textarea name="adds"></textarea><br />
 
@@ -78,7 +78,7 @@
                     <button type="submit">Submit</button>
                 </form>
 
-                <form action="/import" method="post">
+                <form action="/domain" method="put">
                     <label>Import SwitchyOmega Rules</label>
                     <textarea
                         name="rules"
