@@ -3,13 +3,14 @@ from datetime import datetime, timezone
 import bcrypt
 from fastapi import HTTPException
 
-from schemas import UserInDB, UserUpdate
+from schemas import UserInDB, UserInfo, UserRegister
 
 from .database import Q, t_user
 
 
 class User:
-    def register(userinfo: UserUpdate):
+
+    def register(userinfo: UserRegister):
         existing_user = t_user.get(Q.username == userinfo.username)
         if existing_user:
             raise HTTPException(status_code=400, detail="用户名已存在")
@@ -17,12 +18,9 @@ class User:
         return UserInDB(
             username=userinfo.username,
             email=userinfo.email,
-            is_active=userinfo.is_active,
             hashed_password=bcrypt.hashpw(
                 userinfo.password.encode(), bcrypt.gensalt()
             ).decode(),
-            is_admin=False,
-            updated_at=datetime.now(timezone.utc).isoformat(),
         ).model_dump()
 
     def authenticate(username: str, password: str):
@@ -36,21 +34,21 @@ class User:
 
         return user
 
-    def update(new_userinfo: UserUpdate, current_user: dict):
+    def update(new_userinfo: UserInfo, current_user: dict):
         if new_userinfo.username != current_user["username"]:
             existing_user = t_user.get(Q.username == new_userinfo.username)
             if existing_user:
                 raise HTTPException(status_code=400, detail="用户名已存在")
 
         return UserInDB(
-            username=new_userinfo.username,
-            email=new_userinfo.email,
-            is_active=new_userinfo.is_active,
+            username=new_userinfo.username or current_user["username"],
+            email=new_userinfo.email or current_user["email"],
+            is_active=new_userinfo.is_active or current_user["is_active"],
+            is_admin=current_user["is_admin"],
+            updated_at=datetime.now(timezone.utc).isoformat(),
             hashed_password=bcrypt.hashpw(
                 new_userinfo.password.encode(), bcrypt.gensalt()
             ).decode(),
-            is_admin=current_user["is_admin"],
-            updated_at=datetime.now(timezone.utc).isoformat(),
         ).model_dump()
 
     def delete(username: str):
