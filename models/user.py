@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import bcrypt
 from fastapi import HTTPException
 
-from schemas import UserInDB, UserInfo, UserRegister
+from schemas import UserInDB, UserRegister, UserResponse, UserUpdate
 
 from .database import Q, t_user
 
@@ -35,7 +35,7 @@ class User:
 
         return user
 
-    def update(new_userinfo: UserInfo, current_user: dict):
+    def update(new_userinfo: UserUpdate, current_user: UserResponse):
         if new_userinfo.username != current_user["username"]:
             existing_user = t_user.get(Q.username == new_userinfo.username)
             if existing_user:
@@ -43,10 +43,12 @@ class User:
 
         user = UserInDB(
             username=new_userinfo.username,
+            hashed_password=bcrypt.hashpw(
+                new_userinfo.password.encode(), bcrypt.gensalt()
+            ).decode(),
             email=new_userinfo.email,
             is_active=new_userinfo.is_active,
-            updated_at=datetime.now(timezone.utc),
-            hashed_password=current_user["hashed_password"],
+            is_admin=current_user["is_admin"],
         ).model_dump()
         t_user.update(user, Q.username == current_user["username"])
         return user

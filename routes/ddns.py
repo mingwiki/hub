@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import PlainTextResponse
 
 from models import Keyring, get_current_user
+from schemas import UserResponse
 from utils import atimer, generate_key, send_to_bark
 
 router = APIRouter(tags=["Cloudflare DDNS"], prefix="/ddns")
@@ -14,7 +15,7 @@ router = APIRouter(tags=["Cloudflare DDNS"], prefix="/ddns")
 @atimer
 async def generate_short_link_for_homeserver(
     request: Request,
-    current_user=Depends(get_current_user),
+    current_user: UserResponse = Depends(get_current_user),
 ):
     if not current_user["is_admin"]:
         return PlainTextResponse("Permission denied.", status_code=403)

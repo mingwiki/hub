@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
+
+from schemas import UserInDB
 from utils import logger
 
 from .database import Q, t_user
@@ -37,7 +39,7 @@ def jwt_create_token(username: str):
     return jwt.encode(to_encode, os.getenv("JWT_SECRET_KEY"), algorithm="HS256")
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
     username = jwt_decode(token)
     user = t_user.get(Q.username == username)
     if not user:

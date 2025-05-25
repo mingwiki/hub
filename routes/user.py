@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, Form, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from models import User, get_current_user, jwt_create_token
-from schemas import UserInfo, UserRegister
+from schemas import UserRegister, UserResponse, UserUpdate
 from utils import atimer
 
 router = APIRouter(tags=["User Info"], prefix="/user")
 
 
-@router.post("/register", status_code=201, response_model=UserInfo)
+@router.post("/register", status_code=201, response_model=UserResponse)
 @atimer
 async def user_register(userinfo: UserRegister = Form(...)):
     return User.register(userinfo)
@@ -17,7 +17,9 @@ async def user_register(userinfo: UserRegister = Form(...)):
 @router.post("/token")
 @atimer
 async def user_login(form_data: OAuth2PasswordRequestForm = Depends()):
-    current_user = User.authenticate(form_data.username, form_data.password)
+    current_user: UserResponse = User.authenticate(
+        form_data.username, form_data.password
+    )
     if not current_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="用户名或密码错误"
@@ -29,17 +31,17 @@ async def user_login(form_data: OAuth2PasswordRequestForm = Depends()):
     }
 
 
-@router.get("/me", response_model=UserInfo)
+@router.get("/me", response_model=UserResponse)
 @atimer
-async def get_user_info(current_user=Depends(get_current_user)):
+async def get_user_info(current_user: UserResponse = Depends(get_current_user)):
     return current_user
 
 
-@router.put("/me", response_model=UserInfo)
+@router.put("/me", response_model=UserResponse)
 @atimer
 async def update_user_info(
-    new_userinfo: UserInfo = Form(...),
-    current_user=Depends(get_current_user),
+    new_userinfo: UserUpdate = Form(...),
+    current_user: UserResponse = Depends(get_current_user),
 ):
     return User.update(new_userinfo, current_user)
 
@@ -48,7 +50,7 @@ async def update_user_info(
 @atimer
 async def delete_user_info(
     username: str = Form(...),
-    current_user=Depends(get_current_user),
+    current_user: UserResponse = Depends(get_current_user),
 ):
     if username != current_user["username"]:
         raise HTTPException(status_code=403, detail="Permission denied")
