@@ -15,13 +15,14 @@ class User:
         if existing_user:
             raise HTTPException(status_code=400, detail="用户名已存在")
 
-        return UserInDB(
+        user = UserInDB(
             username=userinfo.username,
-            email=userinfo.email,
             hashed_password=bcrypt.hashpw(
                 userinfo.password.encode(), bcrypt.gensalt()
             ).decode(),
         ).model_dump()
+        t_user.insert(user)
+        return user
 
     def authenticate(username: str, password: str):
         user = t_user.get(Q.username == username)
@@ -40,16 +41,15 @@ class User:
             if existing_user:
                 raise HTTPException(status_code=400, detail="用户名已存在")
 
-        return UserInDB(
-            username=new_userinfo.username or current_user["username"],
-            email=new_userinfo.email or current_user["email"],
-            is_active=new_userinfo.is_active or current_user["is_active"],
-            is_admin=current_user["is_admin"],
-            updated_at=datetime.now(timezone.utc).isoformat(),
-            hashed_password=bcrypt.hashpw(
-                new_userinfo.password.encode(), bcrypt.gensalt()
-            ).decode(),
+        user = UserInDB(
+            username=new_userinfo.username,
+            email=new_userinfo.email,
+            is_active=new_userinfo.is_active,
+            updated_at=datetime.now(timezone.utc),
+            hashed_password=current_user["hashed_password"],
         ).model_dump()
+        t_user.update(user, Q.username == current_user["username"])
+        return user
 
     def delete(username: str):
         return {"message": f"{username}账户已删除"}
