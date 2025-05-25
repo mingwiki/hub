@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, Form, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from models import User, get_current_user, jwt_create_token
-from schemas import UserResponse, UserUpdate
+from schemas import UserInfo, UserUpdate
 from utils import atimer
 
 router = APIRouter(tags=["User Info"], prefix="/user")
 
 
-@router.post("/register", status_code=201)
+@router.post("/register", status_code=201, response_model=UserInfo)
 @atimer
 async def user_register(userinfo: UserUpdate = Form(...)):
     return User.register(userinfo)
@@ -29,19 +29,19 @@ async def user_login(form_data: OAuth2PasswordRequestForm = Depends()):
     }
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me", response_model=UserInfo)
 @atimer
 async def get_user_info(current_user=Depends(get_current_user)):
     return current_user
 
 
-@router.put("/me")
+@router.put("/me", response_model=UserInfo)
 @atimer
 async def update_user_info(
-    userinfo: UserUpdate = Form(...),
+    new_userinfo: UserUpdate = Form(...),
     current_user=Depends(get_current_user),
 ):
-    return User.update(userinfo, current_user)
+    return User.update(new_userinfo, current_user)
 
 
 @router.delete("/me")

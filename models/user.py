@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import bcrypt
 from fastapi import HTTPException
 
-from schemas import UserInfo, UserUpdate
+from schemas import UserInDB, UserUpdate
 
 from .database import Q, t_user
 
@@ -14,13 +14,16 @@ class User:
         if existing_user:
             raise HTTPException(status_code=400, detail="用户名已存在")
 
-        user = UserInfo(
+        return UserInDB(
             username=userinfo.username,
+            email=userinfo.email,
+            is_active=userinfo.is_active,
             hashed_password=bcrypt.hashpw(
                 userinfo.password.encode(), bcrypt.gensalt()
             ).decode(),
+            is_admin=False,
+            updated_at=datetime.now(timezone.utc).isoformat(),
         ).model_dump()
-        return {"id": t_user.insert(user), "user": user}
 
     def authenticate(username: str, password: str):
         user = t_user.get(Q.username == username)
@@ -33,28 +36,22 @@ class User:
 
         return user
 
-    def update(userinfo: UserUpdate, current_user: dict):
-        if userinfo.username != current_user["username"]:
-            existing_user = t_user.get(Q.username == userinfo.username)
+    def update(new_userinfo: UserUpdate, current_user: dict):
+        if new_userinfo.username != current_user["username"]:
+            existing_user = t_user.get(Q.username == new_userinfo.username)
             if existing_user:
                 raise HTTPException(status_code=400, detail="用户名已存在")
 
-        return {
-            "message": "用户信息已更新",
-            "q": t_user.update(
-                UserInfo(
-                    username=userinfo.username,
-                    email=userinfo.email,
-                    is_active=userinfo.is_active,
-                    hashed_password=bcrypt.hashpw(
-                        userinfo.password.encode(), bcrypt.gensalt()
-                    ).decode(),
-                    is_admin=current_user["is_admin"],
-                    updated_at=datetime.now(timezone.utc).isoformat(),
-                ).model_dump(),
-                doc_ids=[current_user.doc_id],
-            ),
-        }
+        return UserInDB(
+            username=new_userinfo.username,
+            email=new_userinfo.email,
+            is_active=new_userinfo.is_active,
+            hashed_password=bcrypt.hashpw(
+                new_userinfo.password.encode(), bcrypt.gensalt()
+            ).decode(),
+            is_admin=current_user["is_admin"],
+            updated_at=datetime.now(timezone.utc).isoformat(),
+        ).model_dump()
 
     def delete(username: str):
-        return {"message": "用户已删除", "q": t_user.remove(Q.username == username)}
+        return {"message": f"{username}账户已删除"}
