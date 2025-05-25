@@ -20,7 +20,10 @@ class UserResponse(UserBase):
     email: EmailStr | None = Field(default=None, description="邮箱地址")
     is_active: bool = Field(default=True, description="是否激活")
     is_admin: bool = Field(default=False, description="是否管理员")
-    updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat(),
+        description="更新时间",
+    )
 
 
 class UserInDB(UserResponse):
