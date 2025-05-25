@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from models import User, get_current_user, jwt_create_token
-from schemas import UserUpdate
+from schemas import UserResponse, UserUpdate
 from utils import atimer
 
 router = APIRouter(tags=["User Info"], prefix="/user")
@@ -29,10 +29,9 @@ async def user_login(form_data: OAuth2PasswordRequestForm = Depends()):
     }
 
 
-@router.get("/me")
+@router.get("/me", response_model=UserResponse)
 @atimer
 async def get_user_info(current_user=Depends(get_current_user)):
-    current_user.pop("hashed_password")
     return current_user
 
 

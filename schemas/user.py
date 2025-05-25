@@ -13,7 +13,10 @@ class UserUpdate(UserBase):
     password: str = Field(..., min_length=4, description="密码")
 
 
-class UserInfo(UserBase):
-    hashed_password: str = Field(..., description="哈希密码")
+class UserResponse(UserBase):
     is_admin: bool = Field(default=False, description="是否管理员")
     updated_at: str = Field(default=datetime.now(timezone.utc).isoformat())
+
+
+class UserInfo(UserResponse):
+    hashed_password: str = Field(..., description="哈希密码")
