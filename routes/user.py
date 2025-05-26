@@ -33,7 +33,7 @@ async def user_login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @router.get("/me", response_model=UserResponse)
 @atimer
-async def get_user_info(current_user: UserResponse = Depends(get_current_user)):
+async def get_user_info(current_user=Depends(get_current_user)):
     return current_user
 
 
@@ -41,7 +41,7 @@ async def get_user_info(current_user: UserResponse = Depends(get_current_user)):
 @atimer
 async def update_user_info(
     new_userinfo: UserUpdate = Form(...),
-    current_user: UserResponse = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
     return User.update(new_userinfo, current_user)
 
@@ -50,7 +50,7 @@ async def update_user_info(
 @atimer
 async def delete_user_info(
     username: str = Form(...),
-    current_user: UserResponse = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
     if username != current_user["username"]:
         raise HTTPException(status_code=403, detail="Permission denied")
