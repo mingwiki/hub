@@ -2,7 +2,7 @@ from fastapi import APIRouter, Form, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from models import DomainTreeManager
+from services import DomainTreeManager
 from utils import atimer
 
 templates = Jinja2Templates(directory="templates")

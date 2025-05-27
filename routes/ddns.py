@@ -4,7 +4,8 @@ import httpx
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import PlainTextResponse
 
-from models import Keyring, get_current_user
+from dependencies import get_current_user
+from services import Keyring
 from utils import atimer, generate_key, send_to_bark
 
 router = APIRouter(tags=["Cloudflare DDNS"], prefix="/ddns")

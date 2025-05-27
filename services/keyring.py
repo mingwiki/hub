@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from .database import Q, t_keyring
+from models import Q, t_keyring
 
 
 class Keyring:

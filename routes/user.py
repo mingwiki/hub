@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, Form, HTTPException, status
+from fastapi import APIRouter, Depends, Form
 from fastapi.security import OAuth2PasswordRequestForm
 
-from models import User, get_current_user, jwt_create_token
+from dependencies import get_current_user
 from schemas import UserRegister, UserResponse, UserUpdate
+from services import User
 from utils import atimer
 
 router = APIRouter(tags=["User Info"], prefix="/user")
@@ -17,18 +18,7 @@ async def user_register(userinfo: UserRegister = Form(...)):
 @router.post("/token")
 @atimer
 async def user_login(form_data: OAuth2PasswordRequestForm = Depends()):
-    current_user: UserResponse = User.authenticate(
-        form_data.username, form_data.password
-    )
-    if not current_user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="用户名或密码错误"
-        )
-
-    return {
-        "access_token": jwt_create_token(current_user["username"]),
-        "token_type": "bearer",
-    }
+    return User.authenticate(form_data.username, form_data.password)
 
 
 @router.get("/me", response_model=UserResponse)
@@ -52,6 +42,4 @@ async def delete_user_info(
     username: str = Form(...),
     current_user=Depends(get_current_user),
 ):
-    if username != current_user["username"]:
-        raise HTTPException(status_code=403, detail="Permission denied")
-    return User.delete(username)
+    return User.delete(username, current_user)

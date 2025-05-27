@@ -1,6 +1,6 @@
 import json
 
-from .database import t_domain
+from models import t_domain
 
 
 class DomainTreeManager:

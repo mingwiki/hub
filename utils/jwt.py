@@ -1,17 +1,8 @@
 import os
 from datetime import datetime, timedelta
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import HTTPException, status
 from jose import JWTError, jwt
-
-from schemas import UserInDB
-from utils import logger
-
-from .database import Q, t_user
-
-log = logger(__name__)
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/token")
 
 
 def jwt_decode(token: str):
@@ -37,11 +28,3 @@ def jwt_create_token(username: str):
         "exp": datetime.now() + timedelta(minutes=60),
     }
     return jwt.encode(to_encode, os.getenv("JWT_SECRET_KEY"), algorithm="HS256")
-
-
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
-    username = jwt_decode(token)
-    user = t_user.get(Q.username == username)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user

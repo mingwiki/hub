@@ -1,15 +1,12 @@
-from datetime import datetime, timezone
-
 import bcrypt
 from fastapi import HTTPException
 
+from models import Q, t_user
 from schemas import UserInDB, UserRegister, UserResponse, UserUpdate
-
-from .database import Q, t_user
+from utils import jwt_create_token
 
 
 class User:
-
     def register(userinfo: UserRegister):
         existing_user = t_user.get(Q.username == userinfo.username)
         if existing_user:
@@ -33,7 +30,10 @@ class User:
         if not bcrypt.checkpw(password.encode(), user["hashed_password"].encode()):
             raise HTTPException(status_code=400, detail="密码错误")
 
-        return user
+        return {
+            "access_token": jwt_create_token(username),
+            "token_type": "bearer",
+        }
 
     def update(new_userinfo: UserUpdate, current_user: UserResponse):
         if new_userinfo.username != current_user["username"]:
@@ -53,5 +53,7 @@ class User:
         t_user.update(user, Q.username == current_user["username"])
         return user
 
-    def delete(username: str):
+    def delete(username: str, current_user: UserResponse):
+        if username != current_user["username"]:
+            raise HTTPException(status_code=403, detail="Permission denied")
         return {"message": f"{username}账户已删除"}
