@@ -27,7 +27,7 @@ async def submit(adds: str = Form(""), dels: str = Form("")):
     return RedirectResponse("/domain", status_code=303)
 
 
-@router.put("/")
+@router.post("/import")
 @atimer
 async def import_rules(rules: str = Form(...)):
     domains = []

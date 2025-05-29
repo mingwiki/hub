@@ -48,7 +48,7 @@ async def update_cloudflare_dns_for_homeserver_by_currrent_ip(
     data = {"type": "A", "name": "home.zed.ink", "content": current_ip, "ttl": 1}
     async with httpx.AsyncClient() as client:
         response = await client.put(
-            f"https://api.cloudflare.com/client/v4/zones/{os.getenv("CLOUDFLARE_ZONE_ID")}/dns_records/{os.getenv("CLOUDFLARE_HOME_RECORD_ID")}",
+            f"https://api.cloudflare.com/client/v4/zones/{os.getenv('CLOUDFLARE_ZONE_ID')}/dns_records/{os.getenv('CLOUDFLARE_HOME_RECORD_ID')}",
             json=data,
             headers=headers,
         )
