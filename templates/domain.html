@@ -1,158 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Domain Tree Manager</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-    }
+    <head>
+        <meta charset="UTF-8" />
+        <title>Domain Tree Manager</title>
+        <style>
+            body {
+                margin: 0;
+                font-family: sans-serif;
+            }
 
-    .layout {
-      display: flex;
-      height: 100vh;
-    }
+            .layout {
+                display: flex;
+                height: 100vh;
+            }
 
-    .form {
-      width: 30rem;
-      min-width: 18rem;
-      border-right: 1px solid #ccc;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-    }
+            .form {
+                width: 30rem;
+                min-width: 18rem;
+                border-right: 1px solid #ccc;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+            }
 
-    .form-inner {
-      padding: 1.25rem;
-      overflow-y: auto;
-      flex: 1;
-    }
+            .form-inner {
+                padding: 1.25rem;
+                overflow-y: auto;
+                flex: 1;
+            }
 
-    .tabs {
-      display: flex;
-      border-bottom: 1px solid #ccc;
-    }
+            .tabs {
+                display: flex;
+                border-bottom: 1px solid #ccc;
+            }
 
-    .tab-btn {
-      flex: 1;
-      padding: 0.5rem;
-      font-size: 1rem;
-      cursor: pointer;
-      border: none;
-      background: #f0f0f0;
-      border-bottom: 2px solid transparent;
-    }
+            .tab-btn {
+                flex: 1;
+                padding: 0.5rem;
+                font-size: 1rem;
+                cursor: pointer;
+                border: none;
+                background: #f0f0f0;
+                border-bottom: 2px solid transparent;
+            }
 
-    .tab-btn.active {
-      border-bottom-color: #0077cc;
-      background: #fff;
-      font-weight: bold;
-    }
+            .tab-btn.active {
+                border-bottom-color: #0077cc;
+                background: #fff;
+                font-weight: bold;
+            }
 
-    .panel {
-      display: none;
-    }
+            .panel {
+                display: none;
+            }
 
-    .panel.active {
-      display: block;
-    }
+            .panel.active {
+                display: block;
+            }
 
-    textarea {
-      width: 100%;
-      height: 8rem;
-      resize: vertical;
-      font-family: monospace;
-      margin-bottom: 1rem;
-    }
+            textarea {
+                width: 100%;
+                height: 8rem;
+                resize: vertical;
+                font-family: monospace;
+                margin-bottom: 1rem;
+            }
 
-    button {
-      padding: 0.5rem 1rem;
-      margin-bottom: 2rem;
-      font-size: 1rem;
-    }
+            button {
+                padding: 0.5rem 1rem;
+                margin-bottom: 2rem;
+                font-size: 1rem;
+            }
 
-    h2 {
-      margin-top: 0;
-    }
+            h2 {
+                margin-top: 0;
+            }
 
-    .list {
-      flex: 1;
-      padding: 1.25rem;
-      overflow-y: auto;
-      background: #f9f9f9;
-    }
+            .list {
+                flex: 1;
+                padding: 1.25rem;
+                overflow-y: auto;
+                background: #f9f9f9;
+            }
 
-    ol {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-      gap: 0.5rem 1rem;
-      list-style: decimal-leading-zero inside;
-      padding-left: 1rem;
-      margin: 0;
-    }
+            ol {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+                gap: 0.5rem 1rem;
+                list-style: decimal-leading-zero inside;
+                padding-left: 1rem;
+                margin: 0;
+            }
 
-    li {
-      background: #fff;
-      font-family: monospace;
-      padding: 0.25rem 0.5rem;
-      border: 1px solid #ddd;
-      border-radius: 0.25rem;
-    }
-  </style>
-</head>
-<body>
-  <div class="layout">
-    <div class="form">
-      <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('manage')">Manage Domains</button>
-        <button class="tab-btn" onclick="showTab('import')">Import Rules</button>
-      </div>
+            li {
+                background: #fff;
+                font-family: monospace;
+                padding: 0.25rem 0.5rem;
+                border: 1px solid #ddd;
+                border-radius: 0.25rem;
+                word-break: break-all;
+                overflow-wrap: break-word;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="layout">
+            <div class="form">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="showTab('manage')">
+                        Manage Domains
+                    </button>
+                    <button class="tab-btn" onclick="showTab('import')">
+                        Import Rules
+                    </button>
+                </div>
 
-      <div class="form-inner">
-        <div id="manage" class="panel active">
-          <form action="/domain" method="post">
-            <label>Add Domains (one per line):</label><br />
-            <textarea name="adds"></textarea><br />
+                <div class="form-inner">
+                    <div id="manage" class="panel active">
+                        <form action="/domain" method="post">
+                            <label>Add Domains (one per line):</label><br />
+                            <textarea name="adds"></textarea><br />
 
-            <label>Delete Domains (one per line):</label><br />
-            <textarea name="dels"></textarea><br />
+                            <label>Delete Domains (one per line):</label><br />
+                            <textarea name="dels"></textarea><br />
 
-            <button type="submit">Submit</button>
-          </form>
+                            <button type="submit">Submit</button>
+                        </form>
+                    </div>
+
+                    <div id="import" class="panel">
+                        <form action="/domain" method="put">
+                            <label>Import SwitchyOmega Rules</label>
+                            <textarea
+                                name="rules"
+                                placeholder="*.google.com +proxy&#10;*.chatgpt.com +proxy"></textarea>
+                            <button type="submit">Import</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="list">
+                <h2>Domain List</h2>
+                <ol>
+                    {% for domain in domains %}
+                    <li>{{ domain }}</li>
+                    {% endfor %}
+                </ol>
+            </div>
         </div>
 
-        <div id="import" class="panel">
-          <form action="/domain" method="put">
-            <label>Import SwitchyOmega Rules</label>
-            <textarea
-              name="rules"
-              placeholder="*.google.com +proxy&#10;*.chatgpt.com +proxy"></textarea>
-            <button type="submit">Import</button>
-          </form>
-        </div>
-      </div>
-    </div>
+        <script>
+            function showTab(id) {
+                document
+                    .querySelectorAll(".tab-btn")
+                    .forEach((btn) => btn.classList.remove("active"));
+                document
+                    .querySelectorAll(".panel")
+                    .forEach((p) => p.classList.remove("active"));
 
-    <div class="list">
-      <h2>Domain List</h2>
-      <ol>
-        {% for domain in domains %}
-        <li>{{ domain }}</li>
-        {% endfor %}
-      </ol>
-    </div>
-  </div>
-
-  <script>
-    function showTab(id) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-
-      document.querySelector(`.tab-btn[onclick="showTab('${id}')"]`).classList.add('active');
-      document.getElementById(id).classList.add('active');
-    }
-  </script>
-</body>
+                document
+                    .querySelector(`.tab-btn[onclick="showTab('${id}')"]`)
+                    .classList.add("active");
+                document.getElementById(id).classList.add("active");
+            }
+        </script>
+    </body>
 </html>
-
