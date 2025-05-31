@@ -1,0 +1,96 @@
+body {
+    margin: 0;
+    font-family: sans-serif;
+}
+
+.layout {
+    display: flex;
+    height: 100vh;
+}
+
+.form {
+    width: 30rem;
+    min-width: 18rem;
+    border-right: 1px solid #ccc;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-inner {
+    padding: 1.25rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    background: #f0f0f0;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-btn.active {
+    border-bottom-color: #0077cc;
+    background: #fff;
+    font-weight: bold;
+}
+
+.panel {
+    display: none;
+}
+
+.panel.active {
+    display: block;
+}
+
+textarea {
+    width: 100%;
+    height: 8rem;
+    resize: vertical;
+    font-family: monospace;
+    margin-bottom: 1rem;
+}
+
+button {
+    padding: 0.5rem 1rem;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+.list {
+    flex: 1;
+    padding: 1.25rem;
+    overflow-y: auto;
+    background: #f9f9f9;
+}
+
+ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: 0.5rem 1rem;
+    padding-left: 1rem;
+    margin: 0;
+}
+
+li {
+    background: #fff;
+    font-family: monospace;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    word-break: break-all;
+    overflow-wrap: break-word;
+}
