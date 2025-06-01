@@ -14,8 +14,6 @@ else:
 api = FastAPI(
     title="API Service",
     version="0.0.1",
-    contact={"email": "mingwiki@gmail.com"},
-    docs_url="/",
     swagger_ui_parameters={"displayRequestDuration": True, "tryItOutEnabled": True},
 )
 
