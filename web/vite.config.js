@@ -4,6 +4,7 @@ import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
+    base: './',
     plugins: [react(), tailwindcss()],
     build: {
         outDir: '../api/static', // 👈 output goes into backend
@@ -12,6 +13,17 @@ export default defineConfig({
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src'),
+        },
+    },
+    server: {
+        proxy: {
+            '/api': {
+                target: 'http://localhost:9999',
+                changeOrigin: true,
+                secure: false,
+                // If your FastAPI routes do not include the '/api' prefix, uncomment the line below
+                // rewrite: (path) => path.replace(/^\/api/, ''),
+            },
         },
     },
 });

@@ -25,11 +25,20 @@ export default function DomainManager() {
             body: new URLSearchParams({ rules }),
         });
     };
-    useEffect(async () => {
-        const response = await fetch('/api/domain');
-        const data = await response.json();
-        setDomains(data);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch('/api/domain');
+                const data = await response.json();
+                setDomains(data);
+            } catch (error) {
+                console.error('Error fetching domain data:', error);
+            }
+        };
+
+        fetchData();
     }, []);
+
     return (
         <div className='flex h-screen'>
             <div className='w-96 min-w-[18rem] border-r flex flex-col'>

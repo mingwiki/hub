@@ -1,4 +1,7 @@
+import os
+import signal
 import subprocess
+import sys
 
 import typer
 
@@ -10,11 +13,34 @@ def dev():
     """Start both backend and frontend in dev mode."""
     typer.echo("Starting development servers...")
 
+    # Start backend and frontend in their own process groups
+    backend_process = subprocess.Popen(
+        [sys.executable, "-m", "uvicorn", "main:app", "--reload", "--port", "9999"],
+        cwd="api",
+        preexec_fn=os.setsid,  # Start the process in a new session
+    )
+    frontend_process = subprocess.Popen(
+        ["pnpm", "dev"],
+        cwd="web",
+        preexec_fn=os.setsid,  # Start the process in a new session
+    )
+
     try:
-        subprocess.Popen(["uvicorn", "main:app", "--reload"], cwd="api")
-        subprocess.Popen(["pnpm", "dev"], cwd="web")
+        # Wait for both processes to complete
+        backend_process.wait()
+        frontend_process.wait()
     except KeyboardInterrupt:
-        typer.echo("Backend stopped.")
+        typer.echo("Stopping development servers...")
+
+        # Terminate both process groups
+        os.killpg(os.getpgid(backend_process.pid), signal.SIGTERM)
+        os.killpg(os.getpgid(frontend_process.pid), signal.SIGTERM)
+
+        # Wait for processes to terminate
+        backend_process.wait()
+        frontend_process.wait()
+
+        typer.echo("Development servers stopped.")
 
 
 @app.command()
