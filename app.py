@@ -26,7 +26,6 @@ def dev():
     )
 
     try:
-        # Wait for both processes to complete
         backend_process.wait()
         frontend_process.wait()
     except KeyboardInterrupt:
@@ -57,9 +56,16 @@ def build():
 def run():
     """Run backend with built frontend."""
     typer.echo("Running production server...")
+    backend_process = subprocess.Popen(
+        [sys.executable, "-m", "uvicorn", "main:app", "--reload", "--port", "9999"],
+        cwd="api",
+        preexec_fn=os.setsid,
+    )
     try:
-        subprocess.run(["uvicorn", "main:app", "--port", "9999"], cwd="api")
+        backend_process.wait()
     except KeyboardInterrupt:
+        os.killpg(os.getpgid(backend_process.pid), signal.SIGTERM)
+        backend_process.wait()
         typer.echo("Production server stopped.")
 
 
