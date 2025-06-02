@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Form, Response
 from fastapi.responses import RedirectResponse
 from services import DomainTreeManager
-from utils import atimer
+from utils import atimer, logger
 
 router = APIRouter(tags=["Domain Manage"], prefix="/domain")
 mgr = DomainTreeManager()
+log = logger(__name__)
 
 
 @router.get("/")
@@ -19,7 +20,7 @@ async def submit(adds: str = Form(""), dels: str = Form("")):
     add_list = [l for l in adds.splitlines() if l.strip()]
     del_list = [l for l in dels.splitlines() if l.strip()]
     mgr.batch(add_list, del_list)
-    return RedirectResponse("/domain", status_code=303)
+    return RedirectResponse("/#domain", status_code=303)
 
 
 @router.post("/import")
@@ -39,7 +40,7 @@ async def import_rules(rules: str = Form(...)):
     if domains:
         mgr.batch(domains, [])  # Add only
 
-    return RedirectResponse(url="/domain", status_code=303)
+    return RedirectResponse(url="/#domain", status_code=303)
 
 
 def get_autoproxy_txt():

@@ -19,9 +19,9 @@ class DomainTreeManager:
         self.db.insert({"tree": self.tree})
 
     def _add(self, domain):
-        parts = domain.split(".")[::-1]
+        parts = [p for p in domain.strip(".").split(".") if p]
         node = self.tree
-        for p in parts:
+        for p in reversed(parts):
             node = node.setdefault(p, {})
 
     def _delete(self, domain):
