@@ -64,7 +64,7 @@ local_settings.py
 prisma/migrations/
 database/
 
-# Flask stuff:
+# Flask stuff:                                 
 instance/
 .webassets-cache
 
@@ -171,3 +171,5 @@ dump.rdb
 migrations/
 
 db.json
+
+node_modules/

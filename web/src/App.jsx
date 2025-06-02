@@ -1,7 +1,8 @@
-import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 
-import Home from "./pages/Home";
-import DomainManager from "./pages/DomainManager";
+import DomainManager from './pages/DomainManager'
+import Home from './pages/Home'
+
 export default function App() {
   return (
     <HashRouter>
@@ -11,5 +12,5 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </HashRouter>
-  );
+  )
 }
