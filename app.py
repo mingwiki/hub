@@ -61,11 +61,19 @@ def run():
         cwd="api",
         preexec_fn=os.setsid,
     )
+    scheduler_process = subprocess.Popen(
+        [sys.executable, "main.py"],
+        cwd="schedulers",
+        preexec_fn=os.setsid,
+    )
     try:
         backend_process.wait()
+        scheduler_process.wait()
     except KeyboardInterrupt:
         os.killpg(os.getpgid(backend_process.pid), signal.SIGTERM)
+        os.killpg(os.getpgid(scheduler_process.pid), signal.SIGTERM)
         backend_process.wait()
+        scheduler_process.wait()
         typer.echo("Production server stopped.")
 
 
