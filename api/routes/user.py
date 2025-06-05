@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, Form
 from fastapi.security import OAuth2PasswordRequestForm
+from services import User
 
 from dependencies import get_current_user
 from schemas import UserRegister, UserResponse, UserUpdate
-from services import User
 from utils import atimer
 
 router = APIRouter(tags=["User Info"], prefix="/user")
