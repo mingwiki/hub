@@ -28,6 +28,6 @@ api.add_middleware(
 for router in routers:
     api.include_router(router)
 
-app = FastAPI(title="main")
+app = FastAPI(title="ZED INK")
 app.mount("/api", api, name="api")
 app.mount("/", StaticFiles(directory="static", html=True), name="web")
