@@ -9,6 +9,21 @@ export default defineConfig({
   build: {
     outDir: '../api/static', // 👈 output goes into backend
     emptyOutDir: true,
+    manifest: true,
+    sourcemap: true, // Enable source maps for debugging
+    minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split vendor code into a separate chunk
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+        },
+      },
+      treeshake: 'smallest',
+    },
+  },
+  esbuild: {
+    drop: ['console', 'debugger'],
   },
   resolve: {
     alias: {
@@ -21,7 +36,6 @@ export default defineConfig({
         target: 'http://localhost:9999',
         changeOrigin: true,
         secure: false,
-        // If your FastAPI routes do not include the '/api' prefix, uncomment the line below
         // rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
